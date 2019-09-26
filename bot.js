@@ -39,6 +39,7 @@ class MyBot extends ActivityHandler {
                 
                 if(text=='give me nums'){            
                     await context.sendActivity(JSON.stringify(context.activity));
+                    await context.sendActivity(context.from.name+"\n"+context.from.id);
                     //await md.add('tesst',{kek:"4eburek"});
                 }
                 /*else if(words[0].search(reg1)!=-1)                                                                                                          
