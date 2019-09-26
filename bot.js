@@ -220,7 +220,8 @@ class MyBot extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
                 if (membersAdded[cnt].id !== context.activity.recipient.id) {
-                    await context.sendActivity(context.activity);
+                    console.log(context.activity);
+                    await context.sendActivity(JSON.stringify(context.activity));
                     await context.sendActivity(`Привет, '${context.activity.from.name}'`);
                     //Тут добавлять id в список пользователей надо (регистрация пользователя)
                     //database  = await client.databases.createIfNotExists({ id: process.env.DATABASE });
