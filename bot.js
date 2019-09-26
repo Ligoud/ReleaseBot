@@ -37,7 +37,7 @@ class MyBot extends ActivityHandler {
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
                 
-                if(text=='give me nums'){            
+                if(text=='give me nums'){            //Просто почекать
                     await context.sendActivity(JSON.stringify(context.activity));
                     await context.sendActivity(context.activity.from.name+"\n"+context.activity.from.id);
                     //await md.add('tesst',{kek:"4eburek"});
@@ -221,9 +221,7 @@ class MyBot extends ActivityHandler {
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
-                if (membersAdded[cnt].id !== context.activity.recipient.id) {
-                    console.log(context.activity);
-                    await context.sendActivity(JSON.stringify(context.activity));
+                if (membersAdded[cnt].id !== context.activity.recipient.id) {                    
                     await context.sendActivity(`Привет, '${context.activity.from.name}'`);
                     //Тут добавлять id в список пользователей надо (регистрация пользователя)
                     //database  = await client.databases.createIfNotExists({ id: process.env.DATABASE });
