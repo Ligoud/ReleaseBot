@@ -177,8 +177,8 @@ class MyBot extends ActivityHandler {
                     else if(key=='bug')
                     {
                         let itm={
-                          comment=text,
-                          date=context.activity.localTimestamp
+                          comment:text,
+                          date:context.activity.localTimestamp
                         };                       
                        await md.add('review',itm);
                        await context.sendActivity('Запись добавлена')                                              
