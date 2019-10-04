@@ -169,7 +169,7 @@ class MyBot extends ActivityHandler {
                             info+='1) Команды добавления ролей - "/h0"\n'
                         }*/                        
                         //info+='1) Команды отметки об уходе с рабочего места - "/h1"\n'
-                        info+='1) Команды бронирования кабинета - "/h2"\n'                        
+                        info+='1) Команды бронирования кабинета - "/h1"\n'                        
                         //info+='1) Команды учета расходных материалов - "/h3"\n'
                         var btns=MessageFactory.suggestedActions(btns_list,info);
                         await context.sendActivity(btns);
@@ -213,7 +213,7 @@ class MyBot extends ActivityHandler {
                             await context.sendActivity('Роли были добавлены');
                     }                    
                     else*/
-                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help\nЧтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
+                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
                         
                 }
             }
