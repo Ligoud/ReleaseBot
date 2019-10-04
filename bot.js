@@ -179,8 +179,9 @@ class MyBot extends ActivityHandler {
                         let itm={
                           comment=text,
                           date=context.activity.localTimestamp
-                        };
+                        };                       
                        await md.add('review',itm);
+                       await context.sendActivity('Запись добавлена')                                              
                     }
                     else
                     {
