@@ -213,7 +213,7 @@ class MyBot extends ActivityHandler {
                             await context.sendActivity('Роли были добавлены');
                     }                    
                     else*/
-                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help');    
+                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help\nЧтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
                         
                 }
             }
