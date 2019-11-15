@@ -38,8 +38,8 @@ class MyBot extends ActivityHandler {
                 context.sendActivity({Hello ${mentText[0].name})*/
             var words=text.split(' ');
             //убираю меншн. (тут название зарегистрированного бота)
-            await context.sendActivity('Первое слово: '+words[0])    
-            if(words[0] =="ofmbot"){
+            //await context.sendActivity('Первое слово: '+words[0])    
+            if(context.conversation.conversationType=='channel'){
                await context.sendActivity('wtf')    
                words.shift()
             }
