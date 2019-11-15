@@ -34,7 +34,8 @@ class MyBot extends ActivityHandler {
         this.onMessage(async (context, next) => {
             var text=context.activity.text.toLocaleLowerCase();
             var mentText=context.getMentions(context.activity);
-            context.sendActivity({Hello ${mentText[0].name})
+            if(mentText)
+                context.sendActivity({Hello ${mentText[0].name})
             var words=text.split(' ');
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
