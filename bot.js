@@ -41,8 +41,7 @@ class MyBot extends ActivityHandler {
             //await context.sendActivity('Первое слово: '+words[0])  
             //await context.sendActivity(JSON.stringify(context.activity.conversation));
             await context.sednActivity(words[0]+'!!')
-            if(words[0]=='ofmbot')
-                await context.sednActivity('true')
+            
             /*if(){
                await context.sendActivity('wtf')    
                words.shift()
