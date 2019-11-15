@@ -40,8 +40,8 @@ class MyBot extends ActivityHandler {
             //убираю меншн. (тут название зарегистрированного бота)
             //await context.sendActivity('Первое слово: '+words[0])  
             //await context.sendActivity(JSON.stringify(context.activity.conversation));
-            //await context.sednActivity(words[0]+'!!')
-            console.log('kek')
+            //
+            //console.log('kek')
             
             /*if(){
                await context.sendActivity('wtf')    
@@ -50,7 +50,7 @@ class MyBot extends ActivityHandler {
             
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
-                
+                await context.sednActivity(words[0]+'!!')
                 if(text=='give me nums'){            //Просто почекать
                     await context.sendActivity(JSON.stringify(context.activity));
                     await context.sendActivity(context.activity.from.name+"\n"+context.activity.from.id);
