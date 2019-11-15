@@ -171,7 +171,7 @@ class MyBot extends ActivityHandler {
 
                     await context.sendActivity(answ);
                 }*/
-                else if(words[0][0]=='/') //Подсказки по командам сюда
+                else if(words[0][0].search('/')!=-1) //Подсказки по командам сюда
                 {
                     let key=words[0].slice(1);
                     let info=''
@@ -218,7 +218,7 @@ class MyBot extends ActivityHandler {
                             await context.sendActivity(info);
                     }                                        
                 }
-                else if(words[0]=='ничего'){} //Просто типа скипа
+                else if(words[0].search('ничего')!=-1){} //Просто типа скипа
                 else
                 {
                     /*console.log('Проверка на ключевое слово "роль"')
