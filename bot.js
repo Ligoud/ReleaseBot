@@ -191,8 +191,11 @@ class MyBot extends ActivityHandler {
                         //info+='1) Команды отметки об уходе с рабочего места - "/h1"\n'
                         info+='1) Команды бронирования кабинета - "/h1"\n'                        
                         //info+='1) Команды учета расходных материалов - "/h3"\n'
-                        var btns=MessageFactory.suggestedActions(btns_list,info);
-                        await context.sendActivity(btns);
+                        
+                        //Похоже, тимс не работает с кнопками :/
+                        //var btns=MessageFactory.suggestedActions(btns_list,info);
+                        //await context.sendActivity(btns);
+                        await context.sendActivity(info);
                     }
                     else if(key=='bug')
                     {
