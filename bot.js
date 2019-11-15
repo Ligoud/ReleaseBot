@@ -181,8 +181,9 @@ class MyBot extends ActivityHandler {
                         let role=new Role();
                         //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
                         let arr=await role.getRole(context.activity.from.name.toLocaleLowerCase(),md,'roles');
+                        await context.sendActivity('kekus')
                         //console.log(arr);
-                        let btns_list=['/h1','Ничего']
+                        //let btns_list=['/h1','Ничего']
                         info+='Бот распосзнает несколько типов команд. Чтобы получить информацию по формату ввода этих команд - введите:\n'
                        /* if(arr.includes('admin',0)){
                             btns_list.unshift('/h0')
@@ -208,6 +209,7 @@ class MyBot extends ActivityHandler {
                     }
                     else
                     {
+                        await context.sendActivity('keksssus')
                         if(key=='h1')
                             info=messgs.h2; //Потом вернуть
                         /*else if(key=='h2')
@@ -237,7 +239,7 @@ class MyBot extends ActivityHandler {
                     }                    
                     else*/
                         await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
-                        await context.sendActivity(context.activity.text);
+                        //await context.sendActivity(context.activity.text);
                         
                 }
             }
