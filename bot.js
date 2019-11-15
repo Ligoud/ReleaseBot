@@ -39,7 +39,7 @@ class MyBot extends ActivityHandler {
             var words=text.split(' ');
             if(words[0]==='ofmBot') //убираю меншн. (тут название зарегистрированного бота)
                words.shift()
-            await context.sendActivity('Первое слово:'+words[0]'+;Вся фраза:'+ words)
+            await context.sendActivity('Первое слово:'+words[0])
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
                 
