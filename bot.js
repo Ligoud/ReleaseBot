@@ -176,7 +176,7 @@ class MyBot extends ActivityHandler {
                     let key=words[0].slice(1);
                     let info=''
                     const messgs= new CustomMessages();
-                    if(key=='help')
+                    if(key.search('help')!=-1)
                     {
                         let role=new Role();
                         //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
@@ -210,7 +210,7 @@ class MyBot extends ActivityHandler {
                     else
                     {
                         await context.sendActivity('keksssus')
-                        if(key=='h1')
+                        if(key.search('h1')!=-1)
                             info=messgs.h2; //Потом вернуть
                         /*else if(key=='h2')
                             info=messgs.h2;
