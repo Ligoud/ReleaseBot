@@ -37,6 +37,8 @@ class MyBot extends ActivityHandler {
             if(mentText)
                 context.sendActivity({Hello ${mentText[0].name})*/
             var words=text.split(' ');
+            if(words[0]==='ofmBot') //убираю меншн. (тут название зарегистрированного бота)
+               words.shift()
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
                 
@@ -217,7 +219,7 @@ class MyBot extends ActivityHandler {
                     }                    
                     else*/
                         await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
-                        await context.sendActivity(JSON.stringify(context.activity));
+                        await context.sendActivity(context.activity.text);
                         
                 }
             }
@@ -235,8 +237,8 @@ class MyBot extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
                 if (membersAdded[cnt].id !== context.activity.recipient.id) {                    
-                   // await context.sendActivity(`Привет, '${context.activity.from.name}'`);
-                     await context.sendActivity(JSON.stringify(context.activity));
+                    await context.sendActivity(`Привет, юзер'`);
+                     
                     //
                     //Тут добавлять id в список пользователей надо (регистрация пользователя)
                     //database  = await client.databases.createIfNotExists({ id: process.env.DATABASE });
