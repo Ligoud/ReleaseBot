@@ -217,7 +217,7 @@ class MyBot extends ActivityHandler {
                     }                    
                     else*/
                         await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');    
-                        await context.sendActivity(context.activity)
+                        await context.sendActivity(JSON.stringify(context.activity));
                         
                 }
             }
@@ -236,7 +236,7 @@ class MyBot extends ActivityHandler {
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
                 if (membersAdded[cnt].id !== context.activity.recipient.id) {                    
                    // await context.sendActivity(`Привет, '${context.activity.from.name}'`);
-                     await context.sendActivity(context.activity);
+                     await context.sendActivity(JSON.stringify(context.activity));
                     //
                     //Тут добавлять id в список пользователей надо (регистрация пользователя)
                     //database  = await client.databases.createIfNotExists({ id: process.env.DATABASE });
