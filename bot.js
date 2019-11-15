@@ -39,9 +39,9 @@ class MyBot extends ActivityHandler {
             var words=text.split(' ');
             //убираю меншн. (тут название зарегистрированного бота)
             //await context.sendActivity('Первое слово: '+words[0])  
-            //await context.sendActivity(JSON.stringify(context.activity.conversation));
+            await context.sendActivity(JSON.stringify(context.activity.conversation.isGroup));
             var check=context.activity.conversation.isGroup
-            await context.sednActivity(check)
+            await context.sednActivity('true')
             /*if(){
                await context.sendActivity('wtf')    
                words.shift()
