@@ -33,6 +33,8 @@ class MyBot extends ActivityHandler {
         const reg1=/ш[её]л|еха/, reg2=/где|когда|куда/,reg3=/пока/,reg4=/брон/,reg5=/удал|убер/,reg6=/куп|добав|полож/,reg7=/взял|брал/,reg8=//
         this.onMessage(async (context, next) => {
             var text=context.activity.text.toLocaleLowerCase();
+            var mentText=context.getMentions(context.activity);
+            context.sendActivity({Hello ${mentText[0].name})
             var words=text.split(' ');
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
