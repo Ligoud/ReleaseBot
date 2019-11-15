@@ -40,7 +40,8 @@ class MyBot extends ActivityHandler {
             //убираю меншн. (тут название зарегистрированного бота)
             //await context.sendActivity('Первое слово: '+words[0])  
             //await context.sendActivity(JSON.stringify(context.activity.conversation));
-            await context.sednActivity(words[0]+'!!')
+            //await context.sednActivity(words[0]+'!!')
+            console.log('kek')
             
             /*if(){
                await context.sendActivity('wtf')    
