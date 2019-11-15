@@ -51,6 +51,10 @@ class MyBot extends ActivityHandler {
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
                 await context.sendActivity(words[0]+'!!')
+                if(words[0].search('ofmbot')!=-1)
+                {
+                    await context.sendActivity('Привет Kukold')
+                }
                 if(text=='give me nums'){            //Просто почекать
                     await context.sendActivity(JSON.stringify(context.activity));
                     await context.sendActivity(context.activity.from.name+"\n"+context.activity.from.id);
