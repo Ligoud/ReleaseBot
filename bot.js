@@ -39,6 +39,7 @@ class MyBot extends ActivityHandler {
             var words=text.split(' ');
             if(words[0]==='ofmBot') //убираю меншн. (тут название зарегистрированного бота)
                words.shift()
+            await context.sendActivity('Первое слово:'+words[0]'+;Вся фраза:'+ words)
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try{
                 
@@ -237,7 +238,7 @@ class MyBot extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
                 if (membersAdded[cnt].id !== context.activity.recipient.id) {                    
-                    await context.sendActivity(`Привет, юзер'`);
+                    await context.sendActivity('Привет, юзер');
                      
                     //
                     //Тут добавлять id в список пользователей надо (регистрация пользователя)
