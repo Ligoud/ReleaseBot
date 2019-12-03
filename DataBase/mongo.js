@@ -9,7 +9,7 @@ class Mongo{
     async createIfNotExists(colName)      //Создает коллекцию, если ее не было
     {
         try{
-            await client.db('bot').createCollection(colName)
+            await client.db('test').createCollection(colName)
         }
         catch(err){}
     }
