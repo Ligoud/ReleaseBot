@@ -47,7 +47,13 @@ class cabs
         else 
             result_info='Время брони кабинета '+local_cabname+' на '+list[0].date.day+'.'+list[0].date.month+'.'+list[0].date.year+':'
         list.forEach(el => {
-            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+el.time.begins.hours+':'+el.time.begins.minutes+' до '+el.time.ends.hours+':'+el.time.ends.minutes;
+            let begMin=el.time.begins.minutes
+            if(begMin==0)
+                begMin='00'
+            let endMin=el.time.ends.minutes
+            if(endMin==0)
+                endMin='00'
+            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+el.time.begins.hours+':'+begMin+' до '+el.time.ends.hours+':'+endMin;
         });
         return result_info;
     }
@@ -83,25 +89,18 @@ class cabs
         }
         if(midTime!='')
         {
-            console.log('kek',midTime)
-            //query.query+=' AND c.time.begins.hours <= @h1 AND c.time.ends.hours >= @h2'
-            //query.parameters.push({name: '@h1',value:midTime.time.hours},{name: '@h2', value: midTime.time.hours})
             query['time.begins.hours']={$lte: midTime.time.hours}
             query['time.ends.hours']={$gte: midTime.time.hours}
         }
         console.log('customdate in a fucntion', customDate)
         if(customDate=='')
         {
-            /*query.parameters[0].value=localDate.getDate();
-            query.parameters[1].value=localDate.getMonth()+1;
-            query.parameters[2].value=localDate.getFullYear();*/
             query['date.day']=localDate.getDate()
             query['date.month']=localDate.getMonth()+1
             query['date.year']=localDate.getFullYear()
             //console.info(query.parameters);
         }
         else{
-            console.log('here?')
             let obj=parseTime.parseCustomDate(customDate,0);
             /*query.parameters[0].value=obj.day;
             query.parameters[1].value=obj.month;
@@ -232,7 +231,11 @@ class cabs
                 res.time.ends=timeEnd.time;
                 //Проверка на правильность написания времени брони
                 let preDeclineMsg='Бронировать кабинет можно только на текущий день (время начала должно быть меньше времени окончания брони)'
-                if(res.time.begins.hours>res.time.ends.hours)
+                if(res.time.begins.hours<0 || res.time.begins.hours>23 || res.time.ends.hours<0 || res.time.ends.hours>23)
+                    return 'Количество часов должно быть в промежутке от 0 до 23'
+                else if(res.time.begins.minutes<0 || res.time.begins.minutes>59 || res.time.ends.minutes<0 || res.time.ends.minutes>59)
+                    return 'Количество минут должно быть в промежутке от 0 до 59'
+                else if(res.time.begins.hours>res.time.ends.hours)
                     return preDeclineMsg
                 else if(res.time.begins.hours==res.time.ends.hours && res.time.begins.minutes>=res.time.ends.minutes)
                     return preDeclineMsg
