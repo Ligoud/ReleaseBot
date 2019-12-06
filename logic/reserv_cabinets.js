@@ -47,29 +47,18 @@ class cabs
         else 
             result_info='Время брони кабинета '+local_cabname+' на '+list[0].date.day+'.'+list[0].date.month+'.'+list[0].date.year+':'
         list.forEach(el => {
-            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+el.time.begins.hours+':'+el.time.begins.minutes+' до '+el.time.ends.hours+':'+el.time.ends.minutes;
+            let begMin=el.time.begins.minutes
+            if(begMin==0)
+                begMin='00'
+            let endMin=el.time.ends.minutes
+            if(endMin==0)
+                endMin='00'
+            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+el.time.begins.hours+':'+begMin+' до '+el.time.ends.hours+':'+endMin;
         });
         return result_info;
     }
     async show_reserved_list(customDate,localDate,local_cabname,midTime,md,cName) //Индекс указывает на дату / либо ее отстутствие //CustomDate - то, что было в сообщении. Local - та, которая в сообщении
     {                                                                              //midTime - еще один опциональный параметр. Нужен для более точной выборки. '' если нет времени
-        /*const query={
-            query:'SELECT * FROM c WHERE @day = c.date.day AND @month = c.date.month AND @year = c.date.year',
-            parameters:[
-                {
-                    name:'@day',
-                    value:0                    
-                },
-                {
-                    name:'@month',
-                    value:0                    
-                },
-                {
-                    name:'@year',
-                    value:0                    
-                }
-            ]
-        }*/
         const query={
             'date.day':0,
             'date.month':0,
@@ -77,41 +66,29 @@ class cabs
         }
         if(local_cabname!='')
         {
-            //query.query+=' AND c.cab_name = @cabName';                    //COSMOS
-            //query.parameters.push({name: '@cabName',value:local_cabname});
             query['cab_name']=local_cabname;
         }
         if(midTime!='')
         {
             console.log('kek',midTime)
-            //query.query+=' AND c.time.begins.hours <= @h1 AND c.time.ends.hours >= @h2'
-            //query.parameters.push({name: '@h1',value:midTime.time.hours},{name: '@h2', value: midTime.time.hours})
+
             query['time.begins.hours']={$lte: midTime.time.hours}
             query['time.ends.hours']={$gte: midTime.time.hours}
         }
         console.log('customdate in a fucntion', customDate)
         if(customDate=='')
         {
-            /*query.parameters[0].value=localDate.getDate();
-            query.parameters[1].value=localDate.getMonth()+1;
-            query.parameters[2].value=localDate.getFullYear();*/
             query['date.day']=localDate.getDate()
             query['date.month']=localDate.getMonth()+1
             query['date.year']=localDate.getFullYear()
-            //console.info(query.parameters);
         }
         else{
             console.log('here?')
             let obj=parseTime.parseCustomDate(customDate,0);
-            /*query.parameters[0].value=obj.day;
-            query.parameters[1].value=obj.month;
-            query.parameters[2].value=obj.year;*/
             query['date.day']=obj.day
             query['date.month']=obj.month
             query['date.year']=obj.year
         }
-        //console.info(query.query);
-        //const {result: list}=await container.container.items.query(query).toArray();  //cosmos
         const list=await md.read(cName,query);
         console.log(list);
         
@@ -120,7 +97,6 @@ class cabs
             resInfo:''
         };
         if(list.length==0){        
-            //resObj.resInfo= 'На '+query.parameters[0].value+'.'+query.parameters[1].value+'.'+query.parameters[2].value+' нет забронированных кабинетов'
             resObj.resInfo= 'На '+query['date.day']+'.'+query['date.month']+'.'+query['date.year']+' нет забронированных кабинетов'
         }
         else{
@@ -128,7 +104,6 @@ class cabs
             resObj.resInfo= this.form_reserved_answer(list,local_cabname);
         }
         return resObj
-//        return resinfo;
     }
 
     //
@@ -159,7 +134,6 @@ class cabs
         var timeobj=parseTime.parseCustomTime(customTime)
         //console.log('Params: ',customDate,' is customdate. ',timeobj.time.hours,' is time');
         let res=await this.show_reserved_list(customDate,localDate,cab_name,timeobj,md,cName); //res.list - результат запроса
-        console.log('FUCK IT')
         if(res.list.length==0){            
             return 'По вашему запросу не найдено брони'
         }
@@ -169,7 +143,6 @@ class cabs
             await md.delete(cName,{_id:res.list[0]._id})
             return 'Запись удалена'
         }else{
-            console.log('Xxzasdasd')
             return 'Удалять бронь может только тот, кто ее сделал ('+res.list[0].reserved_by+')'
         }
     }
@@ -232,7 +205,11 @@ class cabs
                 res.time.ends=timeEnd.time;
                 //Проверка на правильность написания времени брони
                 let preDeclineMsg='Бронировать кабинет можно только на текущий день (время начала должно быть меньше времени окончания брони)'
-                if(res.time.begins.hours>res.time.ends.hours)
+                if(res.time.begins.hours<0 || res.time.begins.hours>23 || res.time.ends.hours<0 || res.time.ends.hours>23)
+                    return 'Количество часов должно быть в промежутке от 0 до 23'
+                else if(res.time.begins.minutes<0 || res.time.begins.minutes>59 || res.time.ends.minutes<0 || res.time.ends.minutes>59)
+                    return 'Количество минут должно быть в промежутке от 0 до 59'
+                else if(res.time.begins.hours>res.time.ends.hours)
                     return preDeclineMsg
                 else if(res.time.begins.hours==res.time.ends.hours && res.time.begins.minutes>=res.time.ends.minutes)
                     return preDeclineMsg
