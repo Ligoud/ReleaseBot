@@ -33,7 +33,7 @@ const adapter = new BotFrameworkAdapter({
 // Catch-all for errors. (кэчер он и есть кэчер. Ловит ошибки главного хендлера)
 adapter.onTurnError = async (context, error) => {
     console.error(`\n [onTurnError]: ${ error }`);
-    await context.sendActivity(`Ой, что-то пошло не так!`);
+    await context.sendActivity(`Ой, что-то пошло не так!\n\nПопробойту повторить запрос :/`);
 };
 
 // Create the main dialog.
