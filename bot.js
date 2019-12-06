@@ -29,7 +29,7 @@ class MyBot extends ActivityHandler {
         
         var database={};
         var container={};
-        let md=new Mongo();
+        let md=new Mongo(process.env.DATABASE);
         const reg1=/ш[её]л|еха/, reg2=/где|когда|куда/,reg3=/пока/,reg4=/брон/,reg5=/удал|убер/,reg6=/куп|добав|полож/,reg7=/взял|брал/,reg8=//
         this.onMessage(async (context, next) => {
             var text=context.activity.text.toLocaleLowerCase();
