@@ -1,5 +1,6 @@
 var reg=/-|:|\./g 
 function parseCustomTime(time,ind) //Время считывает. Тип 12 30 //time это words
+                                    //ind не нужен походу. только время - одной строкой время
     {
         var newtime={
             time:{

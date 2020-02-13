@@ -132,14 +132,11 @@ class cabs
         }else{}
         
         var timeobj=parseTime.parseCustomTime(customTime)
-        //console.log('Params: ',customDate,' is customdate. ',timeobj.time.hours,' is time');
         let res=await this.show_reserved_list(customDate,localDate,cab_name,timeobj,md,cName); //res.list - результат запроса
         if(res.list.length==0){            
             return 'По вашему запросу не найдено брони'
         }
-        else if(res.list[0].reserved_by==reserved_by){console.log("ЗАДОЛБАЛО")
-            /*let item=container.container.item(res.list[0].id);
-            await item.delete();*/      //COSMOS            
+        else if(res.list[0].reserved_by==reserved_by){console.log("ЗАДОЛБАЛО")           
             await md.delete(cName,{_id:res.list[0]._id})
             return 'Запись удалена'
         }else{
