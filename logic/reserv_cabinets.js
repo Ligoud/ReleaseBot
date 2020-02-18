@@ -2,7 +2,7 @@ const parseTime=require('./timeParser');
 class cabs
 {
     constructor()
-    {console.log('object created')
+    {
         this.room_reg=/кабинет|комнат/;
         this.error_message='Не хватает данных для обработки. Все доступные команды можно посмотреть, отправив команду /help'
     }
@@ -75,7 +75,7 @@ class cabs
             query['time.begins.hours']={$lte: midTime.time.hours}
             query['time.ends.hours']={$gte: midTime.time.hours}
         }
-        console.log('customdate in a fucntion', customDate)
+        //console.log('customdate in a fucntion', customDate)
         if(customDate=='')
         {
             query['date.day']=localDate.getDate()
@@ -83,14 +83,14 @@ class cabs
             query['date.year']=localDate.getFullYear()
         }
         else{
-            console.log('here?')
+            //console.log('here?')
             let obj=parseTime.parseCustomDate(customDate,0);
             query['date.day']=obj.day
             query['date.month']=obj.month
             query['date.year']=obj.year
         }
         const list=await md.read(cName,query);
-        console.log(list);
+        //console.log(list);
         
         var resObj={
             list: list,
@@ -100,7 +100,7 @@ class cabs
             resObj.resInfo= 'На '+query['date.day']+'.'+query['date.month']+'.'+query['date.year']+' нет забронированных кабинетов'
         }
         else{
-            console.log('Длина :',list.length);
+            //console.log('Длина :',list.length);
             resObj.resInfo= this.form_reserved_answer(list,local_cabname);
         }
         return resObj
