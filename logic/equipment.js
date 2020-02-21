@@ -1,9 +1,10 @@
-const parser= require('./timeParser')
+const {TimeParser} = require('./timeParser')
 const end='\n\n'
 
 class Equipment {
     constructor(cName){
         this.cName=cName
+        this.parser=new TimeParser()
     }
     //Формирует информацию об оборудовании для пользователя. Для 1 оборудования
     async form_equip_info(single,md){    //single имеет стурктуру документа из бд (это и есть эквип)
@@ -47,7 +48,7 @@ class Equipment {
         
         if(words[regPos]==='верну'){    //Время
             regPos+=2
-            time=parser.parseCustomTime(words[regPos],regPos)
+            time=this.parser.parseCustomTime(words[regPos],regPos)
         }else{  //Место
             regPos+=2
             if(words[regPos].search(/кабинет/)!=-1){

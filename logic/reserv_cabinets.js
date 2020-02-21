@@ -1,10 +1,11 @@
-const parseTime=require('./timeParser');
+const {TimeParser}=require('./timeParser');
 class cabs
 {
     constructor()
     {
         this.room_reg=/кабинет|комнат/;
         this.error_message='Не хватает данных для обработки. Все доступные команды можно посмотреть, отправив команду /help'
+        this.parser=new TimeParser()
     }
     
     handle_room_keyword(words,ind) //Ищет название кабинета
@@ -84,7 +85,7 @@ class cabs
         }
         else{
             //console.log('here?')
-            let obj=parseTime.parseCustomDate(customDate,0);
+            let obj=this.parser.parseCustomDate(customDate,0);
             query['date.day']=obj.day
             query['date.month']=obj.month
             query['date.year']=obj.year
@@ -131,7 +132,7 @@ class cabs
             k++
         }else{}
         
-        var timeobj=parseTime.parseCustomTime(customTime)
+        var timeobj=this.parser.parseCustomTime(customTime)
         let res=await this.show_reserved_list(customDate,localDate,cab_name,timeobj,md,cName); //res.list - результат запроса
         if(res.list.length==0){            
             return 'По вашему запросу не найдено брони'
@@ -180,16 +181,16 @@ class cabs
             if(words[ind]=='с') //Формат 'с time до time'
             {
                 ind++;
-                const timeStart=parseTime.parseCustomTime(words[ind],ind);
+                const timeStart=this.parser.parseCustomTime(words[ind],ind);
                 ind=timeStart.offset; 
                 if(words[ind]!='до')
                     throw 'Ожидалось увидеть конструкцию c Время до Время Дата. Для дополнительной информации отправьте /help'
                 ind++; //Пропускаю до
-                const timeEnd=parseTime.parseCustomTime(words[ind],ind);
+                const timeEnd=this.parser.parseCustomTime(words[ind],ind);
                 ind=timeEnd.offset;
                 if(words[ind]!=undefined)
                 {
-                    const date=parseTime.parseCustomDate(words[ind],ind);
+                    const date=this.parser.parseCustomDate(words[ind],ind);
                     res.date=date;
                 }
                 else

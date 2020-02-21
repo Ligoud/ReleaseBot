@@ -27,7 +27,8 @@ function afk_logic(context,words) //Обработка
         else
             return false;
     }    
-    const timeParse=require('./timeParser');
+    const {TimeParser}=require('./timeParser');
+    let parser=new TimeParser()
     var unt=2,val=2;    //Индекс единицы измерения и значения времени                
     var ok=true;
     if(words[1]=='на') //Без причины
@@ -82,7 +83,7 @@ function afk_logic(context,words) //Обработка
             else if(words[i]=='в')
             {
                 i++;
-                var timobj=timeParse.parseCustomTime(words[i],i);
+                var timobj=parser.parseCustomTime(words[i],i);
                 afk.returns.alt=true;
                 afk.returns.hour=timobj.time.hours;
                 afk.returns.min=timobj.time.minutes;

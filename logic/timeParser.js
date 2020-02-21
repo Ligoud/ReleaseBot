@@ -1,5 +1,9 @@
-var reg=/-|:|\./g 
-function parseCustomTime(time,ind) //Время считывает. Тип 12 30 //time это words
+
+class TimeParser{
+    constructor(){
+        this.reg=/-|:|\./g
+    }
+    parseCustomTime(time,ind) //Время считывает. Тип 12 30 //time это words
                                     //ind не нужен походу. только время - одной строкой время
     {
         var newtime={
@@ -19,7 +23,7 @@ function parseCustomTime(time,ind) //Время считывает. Тип 12 30
         newtime.offset=ind+1;
         //вся дата в одно слово уместилось( 12/ 12.30/ 12:30)
             const errorMsg='Ожидалось увидеть время в формате Hours.Munutes'
-            var c=restr.split(reg)
+            var c=restr.split(this.reg)
             
             console.log('-------');
             if(c.length>0)
@@ -41,43 +45,58 @@ function parseCustomTime(time,ind) //Время считывает. Тип 12 30
             }
         return newtime;                        
     }
-function parseCustomDate(customDate,ind) //Аналог parseCustomTime только для даты . ind указывает на дату
-{
-    var date={
-        day: 0,
-        month: 0,
-        year:0,
-    };
-    var k=ind+1;
-    var restr=customDate    //Всё в одну строку так же. 
-    const errMsg='Ожидалось увидеть дату в формате Day.Month.Year, где каждое значение - число'
-    /*while(k<words.length ){   //Всё в одну строку (тут именно до конца)
-        restr=restr+words[k]+" " 
-        k++
-    }*/
-    try {
-    var splitted=restr.split(reg); 
-    }catch(err)
-    {throw errMsg}
-
-    
-    if(splitted.length>0)
+    parseCustomDate(customDate,ind) //Аналог parseCustomTime только для даты . ind указывает на дату
+                                            //Тут индекс тоже не нужен????? Потом типа закоменченый добавить
     {
-        splitted.forEach(el => {
-            if(isNaN(+el))
-                throw errMsg;
-        });
-        try{
-            date.day=+splitted[0];
-            date.month=+splitted[1];
-            date.year=+splitted[2];
-        }catch(err) //Если неверно указана дата
+        var date={
+            day: 0,
+            month: 0,
+            year:0,
+        };
+        var k=ind+1;
+        var restr=customDate    //Всё в одну строку так же. 
+        console.log(restr)
+        const errMsg='Ожидалось увидеть дату в формате Day.Month.Year, где каждое значение - число'
+        /*while(k<words.length ){   //Всё в одну строку (тут именно до конца)
+            restr=restr+words[k]+" " 
+            k++
+        }*/
+        try {
+        var splitted=restr.split(this.reg); 
+        }catch(err)
         {throw errMsg}
 
-    }else{
-        throw errMsg
+        
+        if(splitted.length>0)
+        {
+            splitted.forEach(el => {
+                if(isNaN(+el))
+                    throw errMsg;
+            });
+            try{
+                date.day=+splitted[0];
+                date.month=+splitted[1];
+                date.year=+splitted[2];
+            }catch(err) //Если неверно указана дата
+            {throw errMsg}
+
+        }else{
+            throw errMsg
+        }
+        return date;
     }
-    return date;
+
+    parse_timestamp(timestamp){
+        let obj={
+            day: timestamp.getDate(),
+            month: timestamp.getMonth()+1,
+            year: timestamp.getFullYear()
+        }
+        return obj
+    }
 }
-module.exports.parseCustomTime=parseCustomTime;
-module.exports.parseCustomDate=parseCustomDate;
+//var this.reg=/-|:|\./g 
+//module.exports.parseCustomTime=parseCustomTime;
+//module.exports.parseCustomDate=parseCustomDate;
+
+module.exports.TimeParser=TimeParser

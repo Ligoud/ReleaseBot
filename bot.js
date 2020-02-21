@@ -17,6 +17,7 @@ const { cabs } = require('./logic/reserv_cabinets');
 const { Consumables } = require('./logic/consumables');
 const { CustomMessages } = require('./logic/Messages');
 const { Equipment } = require('./logic/equipment')
+const { Meeting } = require('./logic/meeting')
 //
 //Подключаем космосклиент
 //АктивитиХендлер провайдит все обработчики событий
@@ -25,11 +26,13 @@ class MyBot extends ActivityHandler {
         super();
         /* #region  Объявление классов */
         const equip = new Equipment('equipment')
+        const meetup = new Meeting()
         /* #endregion */
         var database = {};
         var container = {};
         let md = new Mongo(process.env.DATABASE);
-        const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/
+        const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/,
+            reg10 = /запомн|запиш/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -97,6 +100,9 @@ class MyBot extends ActivityHandler {
                         }//else if(){
 
                         //}
+                    }else if(words[1].search(/тем/)!=-1){
+                        let answ=await meetup.get_themes(md,words,context.activity.localTimestamp)
+                        await context.sendActivity(answ)
                     } else {
                         if (k != words.length) {
                             console.log('nani')
@@ -248,8 +254,14 @@ class MyBot extends ActivityHandler {
                 /* #endregion */
                 /* #region  Вернул на место оборудование */
                 else if (words[0].search(reg9) != -1) {
-                    let answ=await equip.return_equipment(md,words)
+                    let answ = await equip.return_equipment(md, words)
                     await context.sendActivity(answ);
+                }
+                /* #endregion */
+                /* #region  Организация совещаний */
+                else if (words[0].search(reg10) != -1) {
+                    let answ = await meetup.add_theme(md, words,context.activity.localTimestamp)
+                    await context.sendActivity(answ)
                 }
                 /* #endregion */
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа
