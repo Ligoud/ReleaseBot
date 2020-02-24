@@ -32,7 +32,7 @@ class MyBot extends ActivityHandler {
         var container = {};
         let md = new Mongo(process.env.DATABASE);
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/,
-            reg10 = /запомн|запиш/;
+            reg10 = /запомн|запиш/, reg11=/станов/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -262,6 +262,11 @@ class MyBot extends ActivityHandler {
                 else if (words[0].search(reg10) != -1) {
                     let answ = await meetup.add_theme(md, words,context.activity.localTimestamp)
                     await context.sendActivity(answ)
+                }else if(words[0].search(reg11)!=-1){
+                    if(words[1].search(/основн/)!=-1){  //Установи основную тему для совещаний
+                        let answ= await meetup.set_main_theme(md,words,context.activity.localTimestamp)
+                        await context.sendActivity(answ)
+                    }
                 }
                 /* #endregion */
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа

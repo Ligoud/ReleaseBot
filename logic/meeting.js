@@ -48,6 +48,25 @@ class Meeting{
         })
         return answ
     }
+    async set_main_theme(md,words,additional_date=''){
+        let i=2
+        while(words[i].search(/совещан/)==-1){
+            i++
+        }
+        i++
+        let newarr=words.slice(i)
+        let theme='',date=''
+        if(newarr.includes('на')){
+            let pair=newarr.join(' ').split('на')
+            theme=pair[0]
+            date=pair[1]
+            date=this.parser.parseCustomDate(date,0)
+        }else{
+            date=this.parser.parse_timestamp(additional_date)
+        }
+        await md.update(this.cName,{date:date},{$set:{mainTheme:theme,date:date})
+        return 'Основная тема для совещания установлена'
+    }
 }
 
 module.exports.Meeting=Meeting
@@ -58,3 +77,10 @@ module.exports.Meeting=Meeting
 Сделать проверку на уровне конструкторов в классах , где используется таймпарсер сделать проверку
 чтобы задним числом не добавлялось что-то в бд. (передавать в конструкторе дату)
 */
+
+/*
+    TODO:
+    Добавить в монго addOrReplace()
+    Темы сделать следующим образом {type:'main'/'casual', theme:<>, date:<>}
+    Добавить инициализацию пользователя (Зарегистрируй меня [как ...]) Если имя не указано - как он зареган в мс тимс
+ */
