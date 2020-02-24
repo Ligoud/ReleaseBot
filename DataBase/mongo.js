@@ -45,5 +45,16 @@ class Mongo{
         const col=client.db(this.dbname).collection(colName)
         await col.replaceOne(filter,repObj)
     }
+    async addOrUpdate(colname,filter,item)
+    {
+        await this.createIfNotExists(colname)
+        let res1=await this.read(colname,filter)
+        let result={}
+        if(res1.length!=0){
+            await this.update(colname,filter,{$set:item})
+        }else{
+            await this.add(colname,item)
+        }
+    }
 }
 module.exports.Mongo=Mongo;

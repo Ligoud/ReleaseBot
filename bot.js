@@ -90,16 +90,17 @@ class MyBot extends ActivityHandler {
                     while (k != words.length && words[k - 1].search(local_reg) == -1) //Скипаю фразу до ключевого слова+1
                         k++;
                     //
-                    //if (k != words.length) {
+                    //if (k != words.length) {                    
                     if (words[1] == 'список')  //Покажи список забронированных кабинетов ... //Может понадобиться потом
                     //Покажи список оборудования [подробный]                
                     {
                         if (words[2].search(/оборуд/) != -1) {
                             let res = await equip.get_all_equipment_info(md, words)
                             await context.sendActivity(res)
-                        }//else if(){
-
-                        //}
+                        }else if(words[2].search(/тем/)!=-1){
+                            let answ=await meetup.get_themes(md,words,context.activity.localTimestamp)
+                            await context.sendActivity(answ)
+                        }
                     }else if(words[1].search(/тем/)!=-1){
                         let answ=await meetup.get_themes(md,words,context.activity.localTimestamp)
                         await context.sendActivity(answ)
