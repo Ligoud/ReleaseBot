@@ -1,6 +1,6 @@
 //Вместо переменных окружения. С ними рофляна какая-то
 //
-const { ActivityHandler, MessageFactory } = require('botbuilder');
+const { ActivityHandler, MessageFactory, ActivityTypes } = require('botbuilder');
 //Переменные окружения врубаем 
 const dotenv = require('dotenv');
 const path = require('path');
@@ -18,6 +18,7 @@ const { Consumables } = require('./logic/consumables');
 const { CustomMessages } = require('./logic/Messages');
 const { Equipment } = require('./logic/equipment')
 const { Meeting } = require('./logic/meeting')
+const { Report } = require('./logic/reports')
 //
 //Подключаем космосклиент
 //АктивитиХендлер провайдит все обработчики событий
@@ -26,13 +27,14 @@ class MyBot extends ActivityHandler {
         super();
         /* #region  Объявление классов */
         const equip = new Equipment('equipment')
-        const meetup = new Meeting()
+        const meetup = new Meeting('meeting')
+        const report= new Report('reports')
         /* #endregion */
         var database = {};
         var container = {};
         let md = new Mongo(process.env.DATABASE);
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/,
-            reg10 = /запомн|запиш/, reg11=/станов/;
+            reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -97,12 +99,12 @@ class MyBot extends ActivityHandler {
                         if (words[2].search(/оборуд/) != -1) {
                             let res = await equip.get_all_equipment_info(md, words)
                             await context.sendActivity(res)
-                        }else if(words[2].search(/тем/)!=-1){
-                            let answ=await meetup.get_themes(md,words,context.activity.localTimestamp)
+                        } else if (words[2].search(/тем/) != -1) {
+                            let answ = await meetup.get_themes(md, words, context.activity.localTimestamp)
                             await context.sendActivity(answ)
                         }
-                    }else if(words[1].search(/тем/)!=-1){
-                        let answ=await meetup.get_themes(md,words,context.activity.localTimestamp)
+                    } else if (words[1].search(/тем/) != -1) {
+                        let answ = await meetup.get_themes(md, words, context.activity.localTimestamp)
                         await context.sendActivity(answ)
                     } else {
                         if (k != words.length) {
@@ -261,13 +263,22 @@ class MyBot extends ActivityHandler {
                 /* #endregion */
                 /* #region  Организация совещаний */
                 else if (words[0].search(reg10) != -1) {
-                    let answ = await meetup.add_theme(md, words,context.activity.localTimestamp)
+                    let answ = await meetup.add_theme(md, words, context.activity.localTimestamp)
                     await context.sendActivity(answ)
-                }else if(words[0].search(reg11)!=-1){
-                    if(words[1].search(/основн/)!=-1){  //Установи основную тему для совещаний
-                        let answ= await meetup.set_main_theme(md,words,context.activity.localTimestamp)
+                } else if (words[0].search(reg11) != -1) {
+                    if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
+                        let answ = await meetup.set_main_theme(md, words, context.activity.localTimestamp)
                         await context.sendActivity(answ)
                     }
+                }
+                /* #endregion */
+                /* #region  Сбор отчетов */
+                else if (words[0].search('дяды') != -1) {      
+                    
+                    const reply = { type: ActivityTypes.Message };
+                    reply.text = 'Привет с дядов';
+                    reply.attachments = [await report.attachFile('../Readme.md',context)];
+                    await context.sendActivity(reply)
                 }
                 /* #endregion */
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа

@@ -20,7 +20,8 @@
         "dotenv": "^7.0.0",
         "mongodb": "^3.3.2",
         "natural": "^0.6.3",
-        "restify": "~8.2.0"
+        "restify": "~8.2.0",
+        "textract": "^2.5.0"
     },
     "devDependencies": {
         "eslint": "^5.13.0",

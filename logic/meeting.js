@@ -1,9 +1,9 @@
 const {TimeParser} = require('./timeParser')
 
 class Meeting{
-    constructor(){
+    constructor(cName){
         this.parser=new TimeParser()
-        this.cName='meeting'
+        this.cName=cName
     }
     trim_special(str,regStart,regEnd=''){
         if(regEnd=='')
