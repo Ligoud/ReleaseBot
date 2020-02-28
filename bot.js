@@ -30,11 +30,12 @@ class MyBot extends ActivityHandler {
         const meetup = new Meeting('meeting')
         const report= new Report('reports')
         /* #endregion */
+        var readyToReportUsers={}
         var database = {};
         var container = {};
         let md = new Mongo(process.env.DATABASE);
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/,
-            reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/;
+            reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -45,10 +46,25 @@ class MyBot extends ActivityHandler {
                 if (words[0].search('ofmbot') != -1) {
                     words.shift()
                 }
-
-                if (text == 'give me nums') {            //Просто почекать
-                    await context.sendActivity(JSON.stringify(context.activity));
-                    await context.sendActivity(context.activity.from.name + "\n" + context.activity.from.id);
+                if(text == 'чек'){  //Просто почекать
+                    /*await context.sendActivity(JSON.stringify(context.activity));
+                    await context.sendActivity(context.activity.from.name + "\n" + context.activity.from.id);*/
+                }
+                else if (text == 'мем') {           //Сделать рандомные мемы. Добавляются с БД. В бд юрлки и приписки будут (2 поля) рандоно сделать
+                    
+                    let mem=(url)=> {
+                        // NOTE: The contentUrl must be HTTPS.
+                        return {
+                            name: 'memas',
+                            contentType: 'image/png',
+                            contentUrl: url
+                        };
+                    }
+                    const url='https://i.ytimg.com/vi/2gOd26zsuUs/maxresdefault.jpg'
+                    const reply = { type: ActivityTypes.Message };
+                    reply.text = 'Привет с дядов';
+                    reply.attachments = [mem(url)];
+                    await context.sendActivity(reply)
                 }
                 /* #region  Отметка об уходе */
                 else if (words[0].search(reg1) != -1) //Отметка об уходе                                                                                            
@@ -261,9 +277,23 @@ class MyBot extends ActivityHandler {
                     await context.sendActivity(answ);
                 }
                 /* #endregion */
-                /* #region  Организация совещаний */
-                else if (words[0].search(reg10) != -1) {
-                    let answ = await meetup.add_theme(md, words, context.activity.localTimestamp)
+                /* #region  Организация совещаний и обновление имени пользователя*/
+                else if (words[0].search(reg10) != -1) {    //запомни тему для совещаний / запомни меня как <name>
+                    let answ=''
+                    if(words[1].search('меня')!=-1){                        
+                        let i=1
+                        while(i<words.length-1 && words[i]!='как')    //скипаю до как и чтобы после как еще 1 слово могло поместиться
+                            i++
+                        if(i<words.length-1)
+                            i++
+                        let nickname=words.slice(i).join(' ').trim()
+                        //
+                        console.log(nickname)
+                        let user = new User();
+                        answ=await user.userAdd(context.activity.from, md, 'users',nickname);
+                    }else{
+                        answ = await meetup.add_theme(md, words, context.activity.localTimestamp)
+                    }
                     await context.sendActivity(answ)
                 } else if (words[0].search(reg11) != -1) {
                     if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
@@ -273,12 +303,26 @@ class MyBot extends ActivityHandler {
                 }
                 /* #endregion */
                 /* #region  Сбор отчетов */
-                else if (words[0].search('дяды') != -1) {      
-                    
-                    const reply = { type: ActivityTypes.Message };
-                    reply.text = 'Привет с дядов';
-                    reply.attachments = [await report.attachFile('../Readme.md',context)];
-                    await context.sendActivity(reply)
+                else if (words[0].search(reg12) != -1) {                                              
+                    let answ=await report.parseReport(md,words,context.activity.localTimestamp,context.activity.from.id)
+                    await context.sendActivity(answ)
+                }else if(words[0].search(reg13)!=-1){   //Тут проверку на роль по идее надо сделать :/ тип отчёт только  секретарь
+                    let answ=await report.formResult(md,words,context.activity.localTimestamp)
+                    if(answ.good){
+                        const filename='Отчёт.txt'
+                        report.writeReportToFile(filename,answ.message)
+                        //
+                        const reply = { type: ActivityTypes.Message };
+                        if(answ.message.length>250) //250 - предельная длина отображаемого сообщения
+                            reply.text = 'Отчёт довольно большой. Я решил не отправлять его сообщением, а только файлом.';
+                        else
+                            reply.text = answ.message
+                        reply.attachments = [await report.attachFile('../'+filename,context,'Отчёт')];
+                        //
+                        await context.sendActivity(reply)
+                    }else{
+                        await context.sendActivity(answ.message)
+                    }
                 }
                 /* #endregion */
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа
