@@ -87,6 +87,9 @@ class Meeting{
         await md.addOrUpdate(this.cName,{type:'main',date:date},{type:'main',theme:theme,date:date})
         return 'Основная тема для совещания установлена'
     }
+    async setTime(){
+        
+    }
 }
 
 module.exports.Meeting=Meeting

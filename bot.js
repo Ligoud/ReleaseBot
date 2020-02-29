@@ -34,8 +34,8 @@ class MyBot extends ActivityHandler {
         var database = {};
         var container = {};
         let md = new Mongo(process.env.DATABASE);
-        const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/, reg9 = /вернул/,
-            reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав/;
+        const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/,
+         reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -171,7 +171,7 @@ class MyBot extends ActivityHandler {
                     await context.sendActivity(answ);
                 }
                 /* #endregion */
-                /* #region  Добавить расходник в список возможных расходников */
+                /* #region  Добавить расходник в список возможных расходников, оборудование */
                 else if (words[0].search(reg6) != -1) //Добавить консум
                 {
                     console.log('1')
@@ -181,9 +181,8 @@ class MyBot extends ActivityHandler {
                         console.log('2 - ' + words[1])
                         if (words[1] == 'в') {   //Добавь В корзину ...                            
                             answ = cnsmbls.parse_to_basket('add', words, 3, md, 'basket_to_buy')  //3 т.к. после слова корзина
-                        } else if (words[1].search(/оборудован/) != -1) {
-                            console.log('3')
-
+                        } else if (words[1].search(/оборудован/) != -1) {   //Добавь оборудование а,б,ц
+                            //console.log('3')
                             answ = await equip.add_new_equip(words, md)  //index не нужен, так как всегда со второго идет
                         }
                         else
@@ -233,7 +232,7 @@ class MyBot extends ActivityHandler {
                         //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
                         let arr = await role.getRole(context.activity.from.name.toLocaleLowerCase(), md, 'roles');
                         //console.log(arr);
-                        let btns_list = ['/h1', '/h2', '/h3', 'Ничего']
+                        let btns_list = ['/h1', '/h2', '/h3','/h4','/h5','/h6', 'Ничего']
                         info += 'Бот распосзнает несколько типов команд. Чтобы получить информацию по формату ввода этих команд - введите:\n'
                         if (arr.includes('admin', 0)) {
                             btns_list.unshift('/h0')
@@ -242,6 +241,9 @@ class MyBot extends ActivityHandler {
                         info += '1) Команды отметки об уходе с рабочего места - "/h1"\n'
                         info += '1) Команды бронирования кабинета - "/h2"\n'
                         info += '1) Команды учета расходных материалов - "/h3"\n'
+                        info += '1) Команды учета оборудования - "/h4"\n'
+                        info += '1) Команды организации совещаний - "/h5"\n'
+                        info += '1) Команды формирования отчёта - "/h6"\n'
 
                         //Похоже, тимс не работает с кнопками :/
                         var btns = MessageFactory.suggestedActions(btns_list, info);
@@ -263,8 +265,12 @@ class MyBot extends ActivityHandler {
                             info = messgs.h2;
                         else if (key == 'h3')
                             info = messgs.h3;
-                        //else if(key=='h4')
-                        //  info=messgs.h4
+                        else if(key=='h4')
+                            info=messgs.h4
+                        else if(key=='h5')
+                            info=messgs.h5                            
+                        else if(key=='h6')
+                            info=messgs.h6
 
                         if (info != '')
                             await context.sendActivity(info);
@@ -299,6 +305,8 @@ class MyBot extends ActivityHandler {
                     if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
                         let answ = await meetup.set_main_theme(md, words, context.activity.localTimestamp)
                         await context.sendActivity(answ)
+                    }else if(words[1].search(/врем/)!=-1){   //Установи время проведения совещания
+
                     }
                 }
                 /* #endregion */
