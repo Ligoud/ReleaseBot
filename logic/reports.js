@@ -94,9 +94,10 @@ class Report{
             date=this.parser.parse_timestamp(additional_date)
         }
         //
-        let answ={good:true,message:''}, message='Отчёт за '+this.buildDateRow(date.day)+'.'+this.buildDateRow(date.month)+'.'+date.year+this.endCh
+        let answ={good:true,message:''}, message='Отчёт за '+this.buildDateRow(date.day)+'.'+this.buildDateRow(date.month)+'.'+date.year+'\n\n'
         let res=await md.read(this.cName,{date:date})
-        if(res.length>0){            
+        
+        if(res.length>2){            
             for(let i=0;i<res.length;i++){
                 let personName=await md.read('users',{userId:res[i].userId})
                 personName=personName[0].userName

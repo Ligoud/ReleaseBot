@@ -35,7 +35,7 @@ class MyBot extends ActivityHandler {
         var container = {};
         let md = new Mongo(process.env.DATABASE);
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/,
-         reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав/;
+         reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав|сформир/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');

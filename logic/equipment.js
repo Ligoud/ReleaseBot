@@ -11,8 +11,9 @@ class Equipment {
         //console.log(single)
         let formed=end+'Оборудование "'+single.equipName+'". '
         let res=await md.read('users',{userId:single.took_by})  //100% возвращает реузльтат, если только пользователь не был удален в бд или товар никто не трогал. В таком случае фиг знает что делать xDDDDD
+        let name='Не определенный пользователь'
         if(res.length!=0){
-            let name=res[0].userName
+            name=res[0].userName
             formed+='Последний раз было у '+name+'. '
         }
         switch(single.returnType){
