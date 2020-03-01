@@ -51,7 +51,6 @@ class MyBot extends ActivityHandler {
                     await context.sendActivity(context.activity.from.name + "\n" + context.activity.from.id);*/
                 }
                 else if (text == 'мем') {           //Сделать рандомные мемы. Добавляются с БД. В бд юрлки и приписки будут (2 поля) рандоно сделать
-                    
                     let mem=(url)=> {
                         // NOTE: The contentUrl must be HTTPS.
                         return {
@@ -60,10 +59,12 @@ class MyBot extends ActivityHandler {
                             contentUrl: url
                         };
                     }
-                    const url='https://i.ytimg.com/vi/2gOd26zsuUs/maxresdefault.jpg'
+                    //
+                    let mymem=await md.getRandomDocument('memes',{})
+                    //
                     const reply = { type: ActivityTypes.Message };
-                    reply.text = 'Привет с дядов';
-                    reply.attachments = [mem(url)];
+                    reply.text = mymem.text;
+                    reply.attachments = [mem(mymem.url)];
                     await context.sendActivity(reply)
                 }
                 /* #region  Отметка об уходе */

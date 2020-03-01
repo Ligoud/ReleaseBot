@@ -56,5 +56,13 @@ class Mongo{
             await this.add(colname,item)
         }
     }
+    async getRandomDocument(colName,filter)
+    {        
+        let res=await this.read(colName,filter)
+        let ind=Math.floor(Math.random() * res.length)
+        let item=res[ind]
+       // console.log(item)
+        return item
+    }
 }
 module.exports.Mongo=Mongo;
