@@ -18,17 +18,22 @@ dotenv.config({ path: ENV_FILE });
 // Create HTTP server (что рестифи, что экспресс)
 const server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, () => {
+    console.log(process.env.MicrosoftAppId)
+    console.log(process.env.MicrosoftAppPassword)
+    console.log(process.env.port)
+    console.log(process.env.Port)
     console.log(`\n${ server.name } listening to ${ server.url }`);
     console.log(`\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator`);
     console.log(`\nTo talk to your bot, open the emulator select "Open Bot"`);
 });
-
+console.log('Yikes')
 // Create adapter. (типа логина ???)
 // See https://aka.ms/about-bot-adapter to learn more about how bots work.
 const adapter = new BotFrameworkAdapter({
     appId: process.env.MicrosoftAppId,
     appPassword: process.env.MicrosoftAppPassword
 });
+console.log('Yikes2',adapter)
 
 // Catch-all for errors. (кэчер он и есть кэчер. Ловит ошибки главного хендлера)
 adapter.onTurnError = async (context, error) => {
@@ -39,11 +44,16 @@ adapter.onTurnError = async (context, error) => {
 // Create the main dialog.
 const myBot = new MyBot();
 
+server.get('/',(req,res)=>{
+    res.send('Privet')
+})
 // Listen for incoming requests.
 //Не очень понятно, что такое context (теперь понятно - это контекст TurnHandlerа - рулевого хендлера. Тип общение с пользователем)
 server.post('/api/messages', (req, res) => {
+    console.log('im in lol')
     adapter.processActivity(req, res, async (context) => {
         // Route to main dialog.
         await myBot.run(context);
     });
 });
+console.log('Yikes3')

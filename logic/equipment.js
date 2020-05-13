@@ -8,7 +8,7 @@ class Equipment {
     }
     //Формирует информацию об оборудовании для пользователя. Для 1 оборудования
     async form_equip_info(single,md){    //single имеет стурктуру документа из бд (это и есть эквип)
-        //console.log(single)
+        console.log(single)
         let formed=end+'Оборудование "'+single.equipName+'". '
         let res=await md.read('users',{userId:single.took_by})  //100% возвращает реузльтат, если только пользователь не был удален в бд или товар никто не трогал. В таком случае фиг знает что делать xDDDDD
         let name='Не определенный пользователь'
@@ -18,10 +18,10 @@ class Equipment {
         }
         switch(single.returnType){
             case 'cabinet':
-                formed+='Скорее всего находится в '+single.returns.cabname+'м кабинете.'
+                formed+='\nСкорее всего находится в '+single.returns.cabname+'м кабинете.'
                 break
             case 'time':
-                formed+=name+' обещал вернуть оборудование в '+single.returns.time.time.hours+':'+single.returns.time.time.minutes+'.'
+                formed+=name+' обещал вернуть оборудование в '+this.parser.correctDigit(single.returns.time.time.hours)+':'+this.parser.correctDigit(single.returns.time.time.minutes)+'.'
                 break
             default:
                 formed+='Должно быть на складе'+end
@@ -108,16 +108,33 @@ class Equipment {
         pair[0]=pair[0].trim()
         pair[1]=pair[1].trim()
         //
-        let asnwer='Название оборудования "'+pair[0]+'"было успешно изменено на "'+pair[1]+'"\n\n'
+        let asnwer='Название оборудования "'+pair[0]+'"было успешно изменено на "'+pair[1]+'"'+end
         let res=await md.read(this.cName,{equipName:pair[0]})
         if(res.length>0)
             await md.update(this.cName,{equipName:pair[0]},{$set:{equipName:pair[1]}})
         else
-            asnwer='Не было найдено оборудования с названием "'+pair[0]+'".\n\n'
+            asnwer='Не было найдено оборудования с названием "'+pair[0]+'".'+end
         return asnwer
     }
-    async get_single_equipment_info(md,words){
-
+    async get_single_equipment_info(md,words){  //По итогу получилось так же, как и в all_equipment_info. Ну пускай отдельно будет лол.
+        let k=1
+        let res='Подробная информация о нахождении оборудования:'+end
+        if(words[1].search(/об?/)!=-1){
+            k++
+        }
+        let eqs=words.slice(k).join(' ').split(/,|\./)
+        for(let i=0;i<eqs.length;i++){
+            let el=eqs[i].trim()
+            console.log(el)            
+            let equip=await md.read(this.cName,{equipName:el})
+            if(equip[0]){
+                res+=await this.form_equip_info(equip[0],md)  
+                console.log(res)
+            }else{
+                throw 'Кажется, ошибка в названии оборудования. Такого оборудования не найдено'
+            }
+        }
+        return res
     }
     async get_all_equipment_info(md,words){
         let alleqs=await md.read(this.cName,{})
@@ -133,33 +150,33 @@ class Equipment {
         }
         return res
     }
-
+    //Вернул <equip>,...,<equipN> [на место][в [кабинет NUM][кладовку]]
+    //на место = в кладовку = ничего не указывать
     async return_equipment(md,words){
-        let newarr=words.slice(1)
+        let newarr=words.slice(1) //Отрезаю слово 'Вернул'
         let reteqs=newarr.join(' ')
         const reg=/на|в/
         let na=reteqs.search(reg)
-        let newplace='storeroom', roomname=-1
-        if(na!=-1){
-            //newplace=(+reteqs[na+1]===NaN)?:'storeroom'
-            let narr=reteqs.split(reg)
-            //console.log(reteqs[1])
-            roomname=+narr[1]
-            if(!isNaN(roomname)){
-                newplace='extraroom'
+        let newplace='storeroom', roomname=-1, eqs={}
+        if(na!=-1){ //Значит есть куда возвращать.
+            let spl=reteqs.split(reg)
+            let place=spl[1].trim().split(' ')
+            eqs=spl[0]
+            if(place[0].search('каб')!=-1 && !Number.isNaN(+place[1])){
+                newplace='cabinet'
+                roomname=+place[1]
             }
-            reteqs=reteqs.slice(0,na)
+        }else{
+            eqs=reteqs
         }
-        let exacteqs=reteqs.split(/[,.-:]/)
-        for(let i=0;i<exacteqs.length;i++){
-            let el=exacteqs[i].trim()
-            //console.log(el)
-            //Проверка на существование
+        eqs=eqs.split(/,|\.|и/)
+        eqs.forEach(async el=>{
+            el=el.trim()
             let res=await md.read(this.cName,{equipName:el})
-            
             if(res.length>0)
                 await md.update(this.cName,{equipName:el},{$set:{returnType:newplace, returns:{cabname:roomname}}})
-        }
+        })
+       
         return 'Данные были обновлены'
     }//////НЕ ОБНОВЛЯЕТ НИЧЕГО В БД. ПОСМОТРЕТЬ
 }

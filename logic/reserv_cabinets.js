@@ -44,9 +44,9 @@ class cabs
         list.sort(sort_alg());
         var result_info=''
         if(local_cabname=='')
-            result_info='Список забронированных кабиентов на '+list[0].date.day+'.'+list[0].date.month+'.'+list[0].date.year+':';
+            result_info='Список забронированных кабиентов на '+this.parser.correctDigit(list[0].date.day)+'.'+this.parser.correctDigit(list[0].date.month)+'.'+list[0].date.year+':';
         else 
-            result_info='Время брони кабинета '+local_cabname+' на '+list[0].date.day+'.'+list[0].date.month+'.'+list[0].date.year+':'
+            result_info='Время брони кабинета '+local_cabname+' на '+this.parser.correctDigit(list[0].date.day)+'.'+this.parser.correctDigit(list[0].date.month)+'.'+list[0].date.year+':'
         list.forEach(el => {
             let begMin=el.time.begins.minutes
             if(begMin==0)
@@ -54,7 +54,7 @@ class cabs
             let endMin=el.time.ends.minutes
             if(endMin==0)
                 endMin='00'
-            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+el.time.begins.hours+':'+begMin+' до '+el.time.ends.hours+':'+endMin;
+            result_info+='\n* Кабинет '+el.cab_name+' забронирован с '+this.parser.correctDigit(el.time.begins.hours)+':'+begMin+' до '+this.parser.correctDigit(el.time.ends.hours)+':'+endMin;
         });
         return result_info;
     }
@@ -202,6 +202,10 @@ class cabs
                 res.time.begins=timeStart.time;
                 res.time.ends=timeEnd.time;
                 //Проверка на правильность написания времени брони
+                let msgTime={
+                    hrs:localDate.getHours(),
+                    mins:localDate.getMinutes()
+                }
                 let preDeclineMsg='Бронировать кабинет можно только на текущий день (время начала должно быть меньше времени окончания брони)'
                 if(res.time.begins.hours<0 || res.time.begins.hours>23 || res.time.ends.hours<0 || res.time.ends.hours>23)
                     return 'Количество часов должно быть в промежутке от 0 до 23'
@@ -211,6 +215,8 @@ class cabs
                     return preDeclineMsg
                 else if(res.time.begins.hours==res.time.ends.hours && res.time.begins.minutes>=res.time.ends.minutes)
                     return preDeclineMsg
+                else if(res.time.begins.hours<msgTime.hrs || (res.time.begins.hours==msgTime.hrs && res.time.begins.minutes<msgTime.mins))
+                    return 'Задним числом бронировать нельзя'
                 //
                 //Проверка на то, занято ли время брони или нет
                 const tempDate=res.date.day+'.'+res.date.month+'.'+res.date.year //Проверку сделать

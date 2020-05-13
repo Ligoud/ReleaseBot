@@ -65,7 +65,7 @@ class Meeting{
         if(result.length>0 && result[0].theme!='')
             answ+='\n\nОсновная тема совещания: "'+result[0].theme+'"\n'
         else
-            asnw+='\n\nОсновная темя совещания еще не назначена\n'
+            answ+='\n\nОсновная темя совещания еще не назначена\n'
         return answ
     }
     async set_main_theme(md,words,additional_date=''){

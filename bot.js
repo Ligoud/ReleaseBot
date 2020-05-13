@@ -28,14 +28,15 @@ class MyBot extends ActivityHandler {
         /* #region  Объявление классов */
         const equip = new Equipment('equipment')
         const meetup = new Meeting('meeting')
-        const report= new Report('reports')
+        const report = new Report('reports')
         /* #endregion */
-        var readyToReportUsers={}
+        var readyToReportUsers = {}
         var database = {};
         var container = {};
         let md = new Mongo(process.env.DATABASE);
+        //Эти реги - просто первые слова шерстят ключевые
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/,
-         reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13=/состав|сформир/;
+            reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13 = /состав|сформир/, reg14 = /как[ио][йе]|[чш]т?о/, reg15=/конч|нужно/,reg16=/подробно/;
         this.onMessage(async (context, next) => {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
@@ -46,12 +47,12 @@ class MyBot extends ActivityHandler {
                 if (words[0].search('ofmbot') != -1) {
                     words.shift()
                 }
-                if(text == 'чек'){  //Просто почекать
+                if (text == 'чек') {  //Просто почекать
                     /*await context.sendActivity(JSON.stringify(context.activity));
                     await context.sendActivity(context.activity.from.name + "\n" + context.activity.from.id);*/
                 }
                 else if (text == 'мем') {           //Сделать рандомные мемы. Добавляются с БД. В бд юрлки и приписки будут (2 поля) рандоно сделать
-                    let mem=(url)=> {
+                    let mem = (url) => {
                         // NOTE: The contentUrl must be HTTPS.
                         return {
                             name: 'memas',
@@ -60,7 +61,7 @@ class MyBot extends ActivityHandler {
                         };
                     }
                     //
-                    let mymem=await md.getRandomDocument('memes',{})
+                    let mymem = await md.getRandomDocument('memes', {})
                     //
                     const reply = { type: ActivityTypes.Message };
                     reply.text = mymem.text;
@@ -105,11 +106,12 @@ class MyBot extends ActivityHandler {
                     const local_reg = /кабинет|комнат/
                     let curr_cab = '' //Название кабинета (для второй ветки)
                     //
-                    let k = 2;
+                    let k = 2;  //индекс названия кабинета или в общем
                     while (k != words.length && words[k - 1].search(local_reg) == -1) //Скипаю фразу до ключевого слова+1
                         k++;
                     //
-                    //if (k != words.length) {                    
+                    //if (k != words.length) {  
+                    console.log('kekekeeee')
                     if (words[1] == 'список')  //Покажи список забронированных кабинетов ... //Может понадобиться потом
                     //Покажи список оборудования [подробный]                
                     {
@@ -119,6 +121,11 @@ class MyBot extends ActivityHandler {
                         } else if (words[2].search(/тем/) != -1) {
                             let answ = await meetup.get_themes(md, words, context.activity.localTimestamp)
                             await context.sendActivity(answ)
+                        } else if (words[2].search(reg4) != -1) {    //Покажи список забронированных кабинетов [на Date]
+                            if (words[4] && words[4].search('на') !== -1)
+                                customDate = words[5];
+                            let resInfo = await cbs.show_reserved_list(customDate, context.activity.localTimestamp, '', '', md, 'cabinets');
+                            await context.sendActivity(resInfo.resInfo);
                         }
                     } else if (words[1].search(/тем/) != -1) {
                         let answ = await meetup.get_themes(md, words, context.activity.localTimestamp)
@@ -172,7 +179,7 @@ class MyBot extends ActivityHandler {
                     await context.sendActivity(answ);
                 }
                 /* #endregion */
-                /* #region  Добавить расходник в список возможных расходников, оборудование */
+                /* #region  Добавить расходник в список возможных расходников, оборудование.  */
                 else if (words[0].search(reg6) != -1) //Добавить консум
                 {
                     console.log('1')
@@ -193,6 +200,23 @@ class MyBot extends ActivityHandler {
                     }
 
                     await context.sendActivity(answ);
+                }
+                /* #endregion */
+                /* #region  Корзина для покупок. Какой расходник купить. Добавление в корзину. */
+                else if (words[0].search(reg14) != -1) {
+                    let cnsmbls = new Consumables();
+                    let localReg = /товар|расходник/
+                    if (words[1].search(localReg) != -1 || words[1].search('купит')!=-1) {  //Если в этой ветке еще чота будет - добавить проверку на ключевое слово 'купить'
+                        let answ = await cnsmbls.getBasketList('basket_to_buy', md)
+                        await context.sendActivity(answ)
+                    }
+                }else if(words[0].search(reg15)!=-1){
+                    let k=1
+                    let cnsmbls=new Consumables()
+                    if(words[1].search('купит')!=-1)
+                        k++
+                    let answ = cnsmbls.parse_to_basket('add', words, k, md, 'basket_to_buy')
+                    await context.sendActivity(answ)
                 }
                 /* #endregion */
                 /* #region  Изъятие расходников и оборудования */
@@ -233,7 +257,7 @@ class MyBot extends ActivityHandler {
                         //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
                         let arr = await role.getRole(context.activity.from.name.toLocaleLowerCase(), md, 'roles');
                         //console.log(arr);
-                        let btns_list = ['/h1', '/h2', '/h3','/h4','/h5','/h6', 'Ничего']
+                        let btns_list = ['/h1', '/h2', '/h3', '/h4', '/h5', '/h6', 'Ничего']
                         info += 'Бот распосзнает несколько типов команд. Чтобы получить информацию по формату ввода этих команд - введите:\n'
                         if (arr.includes('admin', 0)) {
                             btns_list.unshift('/h0')
@@ -266,39 +290,42 @@ class MyBot extends ActivityHandler {
                             info = messgs.h2;
                         else if (key == 'h3')
                             info = messgs.h3;
-                        else if(key=='h4')
-                            info=messgs.h4
-                        else if(key=='h5')
-                            info=messgs.h5                            
-                        else if(key=='h6')
-                            info=messgs.h6
+                        else if (key == 'h4')
+                            info = messgs.h4
+                        else if (key == 'h5')
+                            info = messgs.h5
+                        else if (key == 'h6')
+                            info = messgs.h6
 
                         if (info != '')
                             await context.sendActivity(info);
                     }
                 }
                 /* #endregion */
-                /* #region  Вернул на место оборудование */
+                /* #region  Вернул на место оборудование и подробно про каждое оборудование */
                 else if (words[0].search(reg9) != -1) {
                     let answ = await equip.return_equipment(md, words)
+                    await context.sendActivity(answ);
+                }else if(words[0].search(reg16) !=- 1){
+                    let answ=await equip.get_single_equipment_info(md,words)
                     await context.sendActivity(answ);
                 }
                 /* #endregion */
                 /* #region  Организация совещаний и обновление имени пользователя*/
                 else if (words[0].search(reg10) != -1) {    //запомни тему для совещаний / запомни меня как <name>
-                    let answ=''
-                    if(words[1].search('меня')!=-1){                        
-                        let i=1
-                        while(i<words.length-1 && words[i]!='как')    //скипаю до как и чтобы после как еще 1 слово могло поместиться
+                    let answ = ''
+                    if (words[1].search('меня') != -1) {
+                        let i = 1
+                        while (i < words.length - 1 && words[i] != 'как')    //скипаю до как и чтобы после как еще 1 слово могло поместиться
                             i++
-                        if(i<words.length-1)
+                        if (i < words.length - 1)
                             i++
-                        let nickname=words.slice(i).join(' ').trim()
+                        let nickname = words.slice(i).join(' ').trim()
                         //
                         console.log(nickname)
                         let user = new User();
-                        answ=await user.userAdd(context.activity.from, md, 'users',nickname);
-                    }else{
+                        answ = await user.userAdd(context.activity.from, md, 'users', nickname);
+                    } else {
                         answ = await meetup.add_theme(md, words, context.activity.localTimestamp)
                     }
                     await context.sendActivity(answ)
@@ -306,30 +333,30 @@ class MyBot extends ActivityHandler {
                     if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
                         let answ = await meetup.set_main_theme(md, words, context.activity.localTimestamp)
                         await context.sendActivity(answ)
-                    }else if(words[1].search(/врем/)!=-1){   //Установи время проведения совещания
+                    } else if (words[1].search(/врем/) != -1) {   //Установи время проведения совещания
 
                     }
                 }
                 /* #endregion */
                 /* #region  Сбор отчетов */
-                else if (words[0].search(reg12) != -1) {                                              
-                    let answ=await report.parseReport(md,words,context.activity.localTimestamp,context.activity.from.id)
+                else if (words[0].search(reg12) != -1) {
+                    let answ = await report.parseReport(md, words, context.activity.localTimestamp, context.activity.from.id)
                     await context.sendActivity(answ)
-                }else if(words[0].search(reg13)!=-1){   //Тут проверку на роль по идее надо сделать :/ тип отчёт только  секретарь
-                    let answ=await report.formResult(md,words,context.activity.localTimestamp)
-                    if(answ.good){
-                        const filename='Отчёт.txt'
-                        report.writeReportToFile(filename,answ.message)
+                } else if (words[0].search(reg13) != -1) {   //Тут проверку на роль по идее надо сделать :/ тип отчёт только  секретарь
+                    let answ = await report.formResult(md, words, context.activity.localTimestamp)
+                    if (answ.good) {
+                        const filename = 'Отчёт.txt'
+                        report.writeReportToFile(filename, answ.message)
                         //
                         const reply = { type: ActivityTypes.Message };
-                        if(answ.message.length>250) //250 - предельная длина отображаемого сообщения
+                        if (answ.message.length > 250) //250 - предельная длина отображаемого сообщения
                             reply.text = 'Отчёт довольно большой. Я решил не отправлять его сообщением, а только файлом.';
                         else
                             reply.text = answ.message
-                        reply.attachments = [await report.attachFile('../'+filename,context,'Отчёт')];
+                        reply.attachments = [await report.attachFile('../' + filename, context, 'Отчёт')];
                         //
                         await context.sendActivity(reply)
-                    }else{
+                    } else {
                         await context.sendActivity(answ.message)
                     }
                 }

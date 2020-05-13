@@ -2,8 +2,10 @@ function afk_logic(context,words) //Обработка
 {
     //await context.sendActivity('Выполняется логика афк');
     var _name=context.activity.from.name.toLocaleLowerCase(), _id=context.activity.from.id //Имя пользователя и его id (предполагаю это будет статичная информация в ms teams)
+    let localTimeStamp=context.activity.localTimestamp
+    let hrs=localTimeStamp.getHours(), mins=localTimeStamp.getMinutes();
     //тут контейнер стоял     
-    var date = new Date(); //Сделать изменение UTC
+    var date = localTimeStamp; //Сделать изменение UTC
     var afk={           //Когда ушел    
         date: date,
         returns: {
@@ -87,6 +89,11 @@ function afk_logic(context,words) //Обработка
                 afk.returns.alt=true;
                 afk.returns.hour=timobj.time.hours;
                 afk.returns.min=timobj.time.minutes;
+                //console.log('here is shit')
+                if(afk.returns.hour<hrs || (afk.returns.hour==hrs && afk.returns.min<mins)){//next day 
+                    //afk.date.setDate(afk.date.getDate()+1)
+                    throw('Нельзя указывать на время в прошлом или на следующий день.')
+                }
             }
         }
         else{
@@ -111,10 +118,10 @@ function form_afk_info(obj)
     }                        
     result+=obj.person.name; result=result[0].toUpperCase()+result.slice(1); //Имя с большой буквы сделал
     result+=' ушел '+correctDigit(localdate.getDate())+'.'+correctDigit((localdate.getMonth()+1))+' в '+correctDigit(localdate.getHours())+':'+correctDigit(localdate.getMinutes());
-    result+='\nПричина ухода: '+obj.reason;
+    result+='\n\nПричина ухода: '+obj.reason;
     if(obj.returns.alt){
         if(obj.returns.hour!=0 || obj.returns.min!=0)                            
-            result+='\nДолжен вернуться '+correctDigit(localdate.getDate())+'.'+correctDigit((localdate.getMonth()+1))+' в '+correctDigit(obj.returns.hour)+':'+correctDigit(obj.returns.min);
+            result+='\n\nДолжен вернуться '+correctDigit(localdate.getDate())+'.'+correctDigit((localdate.getMonth()+1))+' в '+correctDigit(obj.returns.hour)+':'+correctDigit(obj.returns.min);
     }
     else       
         if(obj.returns.value!=0 && obj.returns.unit!='')
@@ -123,7 +130,7 @@ function form_afk_info(obj)
                 localdate.setMinutes(localdate.getMinutes()+obj.returns.value);
             else if(obj.returns.unit=='час')
                 localdate.setHours(localdate.getHours()+obj.returns.value);
-            result+='\nДолжен вернуться '+correctDigit(localdate.getDate())+'.'+correctDigit((localdate.getMonth()+1))+' в '+correctDigit(localdate.getHours())+':'+correctDigit(localdate.getMinutes());
+            result+='\n\nДолжен вернуться '+correctDigit(localdate.getDate())+'.'+correctDigit((localdate.getMonth()+1))+' в '+correctDigit(localdate.getHours())+':'+correctDigit(localdate.getMinutes());
         }
                                                     
     return result;
@@ -141,7 +148,7 @@ function who_afk(words)
             id++;
         }
         if(myname[myname.length-1]=='?')
-            myname.slice(0,-1); //Последний символ обрубаю
+            myname=myname.slice(0,-1); //Последний символ обрубаю
         return myname;
     }
     if(words[0]=='где')                    

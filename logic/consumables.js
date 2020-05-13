@@ -11,7 +11,7 @@ class Consumables {
         }
         //const {result: res}= await container.container.items.query(query).toArray();  //COSMOS
         const res = await md.read(cName, query)
-        res.forEach(element => {
+        res.forEach(element => {    //Поч тут форич?? У меня же один консум читается. хммммм. пусть будет.
             element.consum_name = element.consum_name.trim()
         });
         return res;
@@ -26,6 +26,8 @@ class Consumables {
 
         return str;
     }
+    //ХАХАХАХ Я НЕ ЗНАЮ ЧТО ЭТО. 
+    //Кажется, из дефолтной строки Count Consume Получает эти пары. ОБЪЕКТ С ПАРАМИ - МАССИваМИ
     get_sets(words, ind) {
         let count = [], cons = []   //А это можно было объединить в обж сразу
         let cObj = {  //Можно было на 2 лета разбить
@@ -35,11 +37,13 @@ class Consumables {
         //Разбор строки (может через запятую идти 2 пачки бумаги, 5 банок клея)
         while (ind != words.length) //До конца указывают товары
         {
-            if (typeof (+words[ind]) == "number") {
+            if (!Number.isNaN(+words[ind])) {
                 cObj.count = +words[ind]
                 ind++
-            } else
-                throw 'Неверный формат. Ожидалось увидеть Count (' + words[ind] + ')'
+            } else{
+                cObj.count = 1
+                //throw 'Неверный формат. Ожидалось увидеть Count (' + words[ind] + ')'
+            }
             cObj.consum_name = ''
             while (ind != words.length && words[ind - 1][words[ind - 1].length - 1] != ',' && words[ind][0] != ',' && words[ind] != ',') //Для перечисления  ?*********************************
             {
@@ -59,9 +63,7 @@ class Consumables {
 
     normalize_consum_name(name){    //name - имя расходника в тч из нескольких слов состоящее
 
-    }
-    /* #endregion */
-    /* #region основной функциОНАЛ */
+    }   
     async change_busket(action, md, cName, name, count) //Доавляем/удаляем из корзины
     {
         let addObj = {
@@ -84,34 +86,67 @@ class Consumables {
         }
         return returnAnsw
     }
+    /* #endregion */
+    /* #region основной функциОНАЛ */   
+
+ 
+    //Начиная с названия первого консума подается сюда строка. через запятую можно
+    //Вызывает когда удаляют из корзины или добавляют в нее прямым текстом.
     parse_to_basket(action, words, ind, md, cName)//Парсим строку и обновляем корзину
     {
-        const reg = /,|./
-        let retrn = 'Записи обновлены.'
-        while (ind < words.length) {
-            let clearName = words[ind]    //Название расходника целиком
-            ind++
-            while (ind != words.length && words[ind] != ',' && words[ind - 1][(words[ind - 1].length) - 1] != ',' && words[ind][0] != ',') {
-                clearName += ' ' + words[ind]
-                ind++;
-            }
-
-            clearName = this.custom_slice(clearName)
-
-            if (clearName.search(reg) != -1) {
-                if (action == 'add')
-                    this.change_busket(action, md, cName, clearName, 0)
-                else if (action == 'remove')
-                    retrn += this.change_busket(action, md, cName, clearName, 0)
-            }
-
+        const reg = /,|\./
+        let retrn = 'Введены некорректные данные. Поробуйте команду /help для получения дополнительной информации.'
+        if(ind<words.length){
+            let spl=words.slice(ind).join(' ').split(reg)
+            spl.forEach(el=>{
+                let pairConsumeCount=el.split(' ')
+                let count=0                
+                if(!Number.isNaN(+pairConsumeCount[pairConsumeCount.length-1])){
+                    count=+pairConsumeCount.pop()//Забираю каунт, раз уж он есть                    
+                }
+                let consume=pairConsumeCount.join(' ')//джойню полное название консума                    
+                consume = this.custom_slice(consume)
+          
+                if (consume.search(reg) == -1) {    //Зачем тут эта проверка?!?!? Тупо буферная защита            
+                    if (action == 'add')
+                        this.change_busket(action, md, cName, consume, count)
+                    else if (action == 'remove')
+                        retrn += this.change_busket(action, md, cName, consume, count)
+                    retrn = 'Записи обновлены.'
+                }
+            })
         }
+        
         return retrn
     }
+    async getBasketList(cName,md){
+        let basketList= await md.read(cName,{})
+        let result='Пока нет товаро для покупки.'
+        if(basketList.length>0){
+            result='Список товаров, которые нужно купить:\n'
+            basketList.forEach(el=>{
+                result+=' 1) '+el.consum_name
+                if(el.count>0)
+                    result+=' ('+el.count+' шт.)'
+                result+='\n'
+            })
+        }
+        return result
+    }
     //Добавь 13 Ручка (дада очень смещно)
+    //название странное. но менять не буду.
     async change_consume(action, md, cName, words, ind, optional_container = '') //container - куда записываем, words - это текст юзера по словам разбитый, 
     //ind - позиция, с которой продолжать парсинг words, optional_container - корзина           
     {
+        let delteFromBasketInCaseWeNeedIt=async (consume,count)=>{
+            const btb='basket_to_buy'
+            let basktCons=await this.get_consume(md,btb,consume)
+            //console.log(basktCons)
+            if(basktCons.length>0 && basktCons[0].count<=count){
+                await this.change_busket('remove',md,btb,consume,0)
+            }
+        }
+
         let count = [], cons = []
         let cObj = {  //Просто объект для пуша в бд
             consum_name: '',
@@ -122,8 +157,8 @@ class Consumables {
         cons = res.cons;
         let returnAnswer = 'Записи обновлены.'
         //
-        console.log(optional_container)
-        console.info(cons.toString())
+        //console.log(optional_container)
+        //console.info(cons.toString())
 
         if (count.length != cons.length)
             throw 'Коамнда добавления расходников неправильно составлена.Введите /help для просмотра подробной информации'
@@ -134,8 +169,10 @@ class Consumables {
                     if (action == 'add') {
                         cObj.consum_name = cons[i]
                         cObj.count = count[i]
+                        //ТУТ МОЖЕТ БЫТЬ ВАШ NATURAL
                         //await container.container.items.create(cObj)
                         await md.add(cName, cObj)
+                        await delteFromBasketInCaseWeNeedIt(cObj.consum_name,cObj.count)
                     } else if (action == 'remove') {
                         if (cons.length == 1)
                             returnAnswer = 'О расходнике "' + cons[i] + '" не было найдено записей.'
@@ -143,27 +180,31 @@ class Consumables {
                             returnAnswer += '\nО расходнике "' + cons[i] + '" не было найдено записей.\n'
                         cObj.consum_name = cons[i]
                         cObj.count = 0
+                        //ТУТ МОЖЕТ БЫТЬ ВАШ NATURAL
                         //await container.container.items.create(cObj)    //В любом случае добавляю запись
                         await md.add(cName, cObj)
                     }
-                } else {
+                } else {    //Если записи уже есть
                     let result = await md.read(cName, { _id: res[0]._id })
                     let maBody = res[0]
                     //console.log(maBody);
-                    if (action == 'add')
+                    if (action == 'add'){
                         maBody.count += count[i]
+                        //UPDATE basket in case we need it
+                        await delteFromBasketInCaseWeNeedIt(maBody.consum_name,count[i])
+                    }
                     else if (action == 'remove') {
                         if (maBody.count == 0)
                             returnAnswer += '\nСудя по всему расходника "' + maBody.consum_name + '" нет в наличии либо не обновлены данные о нем\n'
                         else {
                             maBody.count -= count[i]
-                            if (maBody.count == 0) {
+                            if (maBody.count <= 0) {
                                 returnAnswer += '\nРасходник "' + maBody.consum_name + '" был добавлен в список товаров к покупке (закончились на складе)'
                                 await this.change_busket('add', md, optional_container, maBody.consum_name, 0)
                             }
                         }
                     }
-                    console.log('THERE IS A HUGE PROBLEm')
+                    //console.log('THERE IS A HUGE PROBLEm')
                     await md.replace(cName, { _id: res[0]._id }, maBody);
                 }
             }

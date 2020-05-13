@@ -3,6 +3,13 @@ class TimeParser{
     constructor(){
         this.reg=/-|:|\./g
     }
+    correctDigit(digit)
+    {
+        let month=digit.toString()  //не обязательно месяц. что угодно
+        if(month.length==1)
+            month='0'+month;
+        return month
+    }  
     parseCustomTime(time,ind) //Время считывает. Тип 12 30 //time это words
                                     //ind не нужен походу. только время - одной строкой время
     {
