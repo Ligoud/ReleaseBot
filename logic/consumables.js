@@ -51,6 +51,7 @@ class Consumables {
                 ind++;
             }
             cObj.consum_name = this.custom_slice(cObj.consum_name);
+            //cObj.consum_name=this.normalize_consum_name(cObj.consum_name)   // < ---- Normalized
             count.push(cObj.count)
             cons.push(cObj.consum_name)
         }
@@ -60,9 +61,35 @@ class Consumables {
         }
         return res;
     }
-
+    //Инициализируем библиотеку AZ.Morph
+    async initAZlibrary(){
+        let az=require('az')
+        let prom=new Promise((resolve,reject)=>{
+            az.Morph.init(()=>{
+                console.log('DAWG loaded')
+                resolve()
+            })
+        })
+        await prom
+        this.morph=az.Morph
+    }
+    //Возвращает название консума в именительном падеже (каждое слово)
     normalize_consum_name(name){    //name - имя расходника в тч из нескольких слов состоящее
-
+        //console.log('NORMALIZING ',name)
+        
+        name=name.split(' ')
+        let normWord=[]
+        name.forEach(el=>{
+            let parse=this.morph(el,{typos:'auto'})[0]
+            let nw=parse.normalize(true).word
+            normWord.push(nw)
+            //console.log(parse.tag.CAse)
+            //console.log(nw,' - ',parse.inflect(parse.tag).word)
+        })
+        normWord=normWord.join(' ').trim()
+        
+        //console.log('normalized row ',normWord)
+        return normWord                
     }   
     async change_busket(action, md, cName, name, count) //Доавляем/удаляем из корзины
     {
@@ -138,6 +165,8 @@ class Consumables {
     async change_consume(action, md, cName, words, ind, optional_container = '') //container - куда записываем, words - это текст юзера по словам разбитый, 
     //ind - позиция, с которой продолжать парсинг words, optional_container - корзина           
     {
+        await this.initAZlibrary()
+        //
         let delteFromBasketInCaseWeNeedIt=async (consume,count)=>{
             const btb='basket_to_buy'
             let basktCons=await this.get_consume(md,btb,consume)
@@ -164,13 +193,13 @@ class Consumables {
             throw 'Коамнда добавления расходников неправильно составлена.Введите /help для просмотра подробной информации'
         else {
             for (let i = 0; i < count.length; i++) {
+                cons[i]=this.normalize_consum_name(cons[i])
                 let res = await this.get_consume(md, cName, cons[i])
                 if (res.length == 0) {  //Если нет записей еще
                     if (action == 'add') {
                         cObj.consum_name = cons[i]
                         cObj.count = count[i]
-                        //ТУТ МОЖЕТ БЫТЬ ВАШ NATURAL
-                        //await container.container.items.create(cObj)
+                        
                         await md.add(cName, cObj)
                         await delteFromBasketInCaseWeNeedIt(cObj.consum_name,cObj.count)
                     } else if (action == 'remove') {
@@ -180,8 +209,7 @@ class Consumables {
                             returnAnswer += '\nО расходнике "' + cons[i] + '" не было найдено записей.\n'
                         cObj.consum_name = cons[i]
                         cObj.count = 0
-                        //ТУТ МОЖЕТ БЫТЬ ВАШ NATURAL
-                        //await container.container.items.create(cObj)    //В любом случае добавляю запись
+                        
                         await md.add(cName, cObj)
                     }
                 } else {    //Если записи уже есть
@@ -214,8 +242,8 @@ class Consumables {
     /* #endregion */
 }
 
-var cons=new Consumables()
+//var cons=new Consumables()
 
-cons.normalize_consum_name('гелевые ручки')
+//cons.normalize_consum_name('гелевые ручки')
 //console.info(az.Morph)
 module.exports.Consumables = Consumables;

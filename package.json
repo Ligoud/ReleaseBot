@@ -16,10 +16,10 @@
         "url": "https://github.com"
     },
     "dependencies": {
+        "az": "^0.2.3",
         "botbuilder": "~4.4.0",
         "dotenv": "^7.0.0",
         "mongodb": "^3.3.2",
-        "natural": "^0.6.3",
         "restify": "~8.2.0",
         "textract": "^2.5.0"
     },
