@@ -20,7 +20,8 @@ const { Equipment } = require('./logic/equipment')
 const { Meeting } = require('./logic/meeting')
 const { Report } = require('./logic/reports')
 //
-//Подключаем космосклиент
+//
+
 //АктивитиХендлер провайдит все обработчики событий
 class MyBot extends ActivityHandler {
     constructor() {
@@ -36,10 +37,26 @@ class MyBot extends ActivityHandler {
         let md = new Mongo(process.env.DATABASE);
         //Эти реги - просто первые слова шерстят ключевые
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/,
-            reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13 = /состав|сформир/, reg14 = /как[ио][йе]|[чш]т?о/, reg15=/конч|нужно/,reg16=/подробно/;
+            reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13 = /состав|сформир/, reg14 = /как[ио][йе]|[чш]т?о/, reg15 = /конч|нужно/, reg16 = /подробно/;
         this.onMessage(async (context, next) => {
+            
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
+            /* #region  Проверка на опечатки */
+                let Morph = require('az').Morph
+                let prom = new Promise((resolve, reject) => {
+                    Morph.init(() => {
+                        console.log('DAWG loaded in msg receive')
+                        resolve()
+                    })
+                })
+                await prom                
+                words.forEach(el=>{                    
+                    let parse=Morph(el,{typos:'auto',stutter:5})
+                    if(parse.length>0)  //Если распознаваемое слово. П.С. слово мем - не распознаваемое xD
+                        el=Morph(el,{typos:'auto',stutter:5})[0].word
+                })
+            /* #endregion */
 
             //await context.sendActivity(`Вы сказали '${ text }'`);
             try {
@@ -188,14 +205,14 @@ class MyBot extends ActivityHandler {
                     if (words[0].search('добав') != -1) {
                         console.log('2 - ' + words[1])
                         if (words[1] == 'в') {   //Добавь В корзину ...                            
-                            answ = cnsmbls.parse_to_basket('add', words, 3, md, 'basket_to_buy')  //3 т.к. после слова корзина
+                            answ = await cnsmbls.parse_to_basket('add', words, 3, md, 'basket_to_buy')  //3 т.к. после слова корзина
                         } else if (words[1].search(/оборудован/) != -1) {   //Добавь оборудование а,б,ц
                             //console.log('3')
                             answ = await equip.add_new_equip(words, md)  //index не нужен, так как всегда со второго идет
                         }
-                        else
+                        else   //Я не знаю что это
                             answ = await cnsmbls.change_consume('add', md, 'consumables', words, 1, 'basket_to_buy');
-                    } else {
+                    } else {    //Купил                        
                         answ = await cnsmbls.change_consume('add', md, 'consumables', words, 1, 'basket_to_buy')
                     }
 
@@ -206,16 +223,16 @@ class MyBot extends ActivityHandler {
                 else if (words[0].search(reg14) != -1) {
                     let cnsmbls = new Consumables();
                     let localReg = /товар|расходник/
-                    if (words[1].search(localReg) != -1 || words[1].search('купит')!=-1) {  //Если в этой ветке еще чота будет - добавить проверку на ключевое слово 'купить'
+                    if (words[1].search(localReg) != -1 || words[1].search('купит') != -1) {  //Если в этой ветке еще чота будет - добавить проверку на ключевое слово 'купить'
                         let answ = await cnsmbls.getBasketList('basket_to_buy', md)
                         await context.sendActivity(answ)
                     }
-                }else if(words[0].search(reg15)!=-1){
-                    let k=1
-                    let cnsmbls=new Consumables()
-                    if(words[1].search('купит')!=-1)
+                } else if (words[0].search(reg15) != -1) {
+                    let k = 1
+                    let cnsmbls = new Consumables()
+                    if (words[1].search('купит') != -1)
                         k++
-                    let answ = cnsmbls.parse_to_basket('add', words, k, md, 'basket_to_buy')
+                    let answ = await cnsmbls.parse_to_basket('add', words, k, md, 'basket_to_buy')
                     await context.sendActivity(answ)
                 }
                 /* #endregion */
@@ -306,8 +323,8 @@ class MyBot extends ActivityHandler {
                 else if (words[0].search(reg9) != -1) {
                     let answ = await equip.return_equipment(md, words)
                     await context.sendActivity(answ);
-                }else if(words[0].search(reg16) !=- 1){
-                    let answ=await equip.get_single_equipment_info(md,words)
+                } else if (words[0].search(reg16) != - 1) {
+                    let answ = await equip.get_single_equipment_info(md, words)
                     await context.sendActivity(answ);
                 }
                 /* #endregion */
