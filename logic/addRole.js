@@ -19,15 +19,7 @@ class Role
         }
         let cReg=/\s|,/
         let splitted=names_for_role.split(cReg); //Имена для ролей                   
-        /*const query={
-            query: "SELECT * FROM c WHERE c.name = @name",
-            parameters:[
-            {
-                name: "@name",
-                value: ''
-            }
-            ]
-        }*/
+        
         const query={
             name: ''
         }
@@ -40,14 +32,11 @@ class Role
             {
                 //query.parameters[0].value=splitted[i];    //cosmos
                 query['name']=splitted[i]
-                //let {result: res}=await container.container.items.query(query).toArray()asdasdasdasdas (fignya)
+                
                 let res=await md.read(cName,query)
                 if(res.length>0) //Если запись есть об этом пользователе - добавить роль
                 {
-                    if(res[0].roles.indexOf(role)==-1){
-                        /*let item= container.container.item(res[0].id);
-                        let {body: mabody}=await item.read();                    
-                        await item.replace(mabody);*/
+                    if(res[0].roles.indexOf(role)==-1){                    
                         let item=await md.read(cName,{_id:res[0]._id})
                         let mabody=item[0]
                         mabody.roles.push(role);
@@ -76,19 +65,10 @@ class Role
     }
     async getRole(username,md,cName)
     {
-        /*const query={
-            query:'SELECT c.roles FROM c WHERE c.name = @name',
-            parameters:[
-                {
-                    name:'@name',
-                    value: username
-                }
-            ]
-        }*/
         const query={
             name: username
         }
-        //let {result: res}=await container.container.items.query(query).toArray().catch((err)=>console.log(err.body));
+        
         let res=await md.read(cName,query)
         if(res[0]==undefined)
             return ''

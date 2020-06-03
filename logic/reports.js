@@ -9,19 +9,23 @@ class Report{
         this.endCh='\n'
     }
 
-    async attachFile(filePath,turnContext,fName='Отчёт'){    //Это все из офф доков взято. Я не особо понимаю эти танцы с бубнами
-        const fileData = fs.readFileSync(path.join(__dirname, filePath));
+    async attachFile(filePath,turnContext,fName='Отчёт'){    //Это все из офф доков взято. Я не особо понимаю эти танцы с бубнами        
+        const pth=path.join(__dirname, filePath)
+        console.log(pth)
+        const fileData = fs.readFileSync(pth);
+
         const connector = turnContext.adapter.createConnectorClient(turnContext.activity.serviceUrl);
         const conversationId = turnContext.activity.conversation.id;
         const response = await connector.conversations.uploadAttachment(conversationId, {
             name: fName,
             originalBase64: fileData,
-            type: 'text/plain'              //Я тектовики буду слать всегда
+            type: 'text/plain'              //Я текстовики буду слать всегда
         });
     
         // Retrieve baseUri from ConnectorClient for... something.
         const baseUri = connector.baseUri;
         const attachmentUri = baseUri + (baseUri.endsWith('/') ? '' : '/') + `v3/attachments/${ encodeURI(response.id) }/views/original`;
+        console.log(attachmentUri)
         return {
             name: fName,
             contentType: 'text/plain',
@@ -36,7 +40,7 @@ class Report{
         let newarr= words.join(' ').replace(/:|-|,/,(match)=>{                        
             return ' '+match+' '
         }).split(' ').slice(1).filter(el=>el!=='')        
-        console.log(newarr)
+        //console.log(newarr)
         let addReport=async (date,message,id)=>{
             let obj={
                 date:date,
@@ -96,10 +100,11 @@ class Report{
         //
         let answ={good:true,message:''}, message='Отчёт за '+this.buildDateRow(date.day)+'.'+this.buildDateRow(date.month)+'.'+date.year+'\n\n'
         let res=await md.read(this.cName,{date:date})
-        
+        //console.log(res)
         if(res.length>2){            
             for(let i=0;i<res.length;i++){
                 let personName=await md.read('users',{userId:res[i].userId})
+                //console.log(personName)
                 personName=personName[0].userName
                 message+=personName+':'+this.endCh+res[i].message
                 message+=this.endCh+'--------------'+this.endCh

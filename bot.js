@@ -298,7 +298,7 @@ class MyBot extends ActivityHandler {
                             date: context.activity.localTimestamp
                         };
                         await md.add('review', itm);
-                        await context.sendActivity('Запись добавлена')
+                        await context.sendActivity('Информаия о неисправности отправлена разработчику')
                     }
                     else {
                         if (key.search('h1') != -1)
@@ -370,7 +370,8 @@ class MyBot extends ActivityHandler {
                             reply.text = 'Отчёт довольно большой. Я решил не отправлять его сообщением, а только файлом.';
                         else
                             reply.text = answ.message
-                        reply.attachments = [await report.attachFile('../' + filename, context, 'Отчёт')];
+                        
+                        //reply.attachments = [await report.attachFile('../' + filename, context, 'Отчёт')];
                         //
                         await context.sendActivity(reply)
                     } else {
@@ -381,6 +382,8 @@ class MyBot extends ActivityHandler {
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа
                 /* #region  Добавление роли */
                 else {  //Тут я решил почему то добавление роли как ендкейс сделать :/  типа "выдай роль такая-то тому-то" именно в таком порядке роль - название - пользователь
+                    //Сделать удаление и просмотр ролей
+                    //!!!!!!!!!!!!!!
                     console.log('Проверка на ключевое слово "роль"')
                     let ind = 0;
                     while (words[ind] != 'роль' && ind != words.length)//Останавливается на роли
@@ -393,7 +396,7 @@ class MyBot extends ActivityHandler {
                             await context.sendActivity('Роли были добавлены');
                     }
                     else
-                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');
+                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n\n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');
                 }
                 /* #endregion */
             }
