@@ -19,6 +19,7 @@ const { CustomMessages } = require('./logic/Messages');
 const { Equipment } = require('./logic/equipment')
 const { Meeting } = require('./logic/meeting')
 const { Report } = require('./logic/reports')
+const { Injection } = require('./logic/injections')
 //
 //
 
@@ -30,6 +31,9 @@ class MyBot extends ActivityHandler {
         const equip = new Equipment('equipment')
         const meetup = new Meeting('meeting')
         const report = new Report('reports')
+        const role = new Role('roles');
+        const inject = new Injection()
+
         /* #endregion */
         var readyToReportUsers = {}
         var database = {};
@@ -37,7 +41,8 @@ class MyBot extends ActivityHandler {
         let md = new Mongo(process.env.DATABASE);
         //Эти реги - просто первые слова шерстят ключевые
         const reg1 = /ш[её]л|еха/, reg2 = /где|когда|куда/, reg3 = /пока/, reg4 = /брон/, reg5 = /удал|убер/, reg6 = /куп|добав|полож/, reg7 = /взял|брал/, reg8 = /мен/,
-            reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13 = /состав|сформир/, reg14 = /как[ио][йе]|[чш]т?о/, reg15 = /конч|нужно/, reg16 = /подробно/;
+            reg9 = /вернул/, reg10 = /запомн|запиш/, reg11 = /станов/, reg12 = /отч[её]т/, reg13 = /состав|сформир/, reg14 = /как[ио][йе]|[чш]т?о/, reg15 = /конч|нужно/, reg16 = /подробно/,
+            reg17=/з[ао]б[еи]р/;
         this.onMessage(async (context, next) => {
             
             var text = context.activity.text.toLocaleLowerCase();
@@ -51,10 +56,10 @@ class MyBot extends ActivityHandler {
                     })
                 })
                 await prom                
-                words.forEach(el=>{                    
+                words.forEach((el,ind,arr)=>{                    
                     let parse=Morph(el,{typos:'auto',stutter:5})
-                    if(parse.length>0)  //Если распознаваемое слово. П.С. слово мем - не распознаваемое xD
-                        el=Morph(el,{typos:'auto',stutter:5})[0].word
+                    if(parse.length>0)  //Если распознаваемое слово. П.С. слово мем - не распознаваемое xD                        
+                        arr[ind]=Morph(el,{typos:'auto',stutter:5})[0].word                        
                 })
             /* #endregion */
 
@@ -88,7 +93,7 @@ class MyBot extends ActivityHandler {
                 /* #region  Отметка об уходе */
                 else if (words[0].search(reg1) != -1) //Отметка об уходе                                                                                            
                 {
-                    var afk = afk_logic.afk_logic(context, words); //Сам результат обрабоки
+                    var afk = await afk_logic.afk_logic(context, words,md); //Сам результат обрабоки
                     await md.add('away_from_workplace', afk)
                     await context.sendActivity('Запись добавлена');
                 }
@@ -115,7 +120,7 @@ class MyBot extends ActivityHandler {
                     }
                 }
                 /* #endregion */
-                /* #region  Вывод информации о занятых кабинетах */
+                /* #region  Вывод информации о занятых кабинетах и списков */
                 else if (words[0].search(reg3) != -1)   //Вывод информации о кабинетах занятых
                 {
                     let cbs = new cabs();
@@ -128,7 +133,6 @@ class MyBot extends ActivityHandler {
                         k++;
                     //
                     //if (k != words.length) {  
-                    console.log('kekekeeee')
                     if (words[1] == 'список')  //Покажи список забронированных кабинетов ... //Может понадобиться потом
                     //Покажи список оборудования [подробный]                
                     {
@@ -143,13 +147,21 @@ class MyBot extends ActivityHandler {
                                 customDate = words[5];
                             let resInfo = await cbs.show_reserved_list(customDate, context.activity.localTimestamp, '', '', md, 'cabinets');
                             await context.sendActivity(resInfo.resInfo);
+                        }else if(words[2].search(/пользоват|работник|юзер/)!=-1){
+                            let answ=await afk_logic.get_list_of_users(md)
+                            await context.sendActivity(answ)
+                        }else if(words[2].search(/рол/)!=-1){    //Список ролей
+                            let answ=await role.getListOfRoles(md)
+                            await context.sendActivity(answ)
+                        }
+                        else{
+                            throw 'Команда не была распознана. Попробуйте /help'
                         }
                     } else if (words[1].search(/тем/) != -1) {
                         let answ = await meetup.get_themes(md, words, context.activity.localTimestamp)
                         await context.sendActivity(answ)
-                    } else {
-                        if (k != words.length) {
-                            console.log('nani')
+                    } else{ //Чек мб сделать. Хз чо за k. Что-то старое
+                        if (k != words.length) {                            
                             if (words[1].search(reg4) != -1) //Покажи бронь kabineta ...
                             {
                                 curr_cab = words[k];
@@ -270,13 +282,11 @@ class MyBot extends ActivityHandler {
                     let info = ''
                     const messgs = new CustomMessages();
                     if (key.search('help') != -1) {
-                        let role = new Role();
-                        //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
-                        let arr = await role.getRole(context.activity.from.name.toLocaleLowerCase(), md, 'roles');
+                        let arr = await role.getRole(context.activity.from.id, md);
                         //console.log(arr);
                         let btns_list = ['/h1', '/h2', '/h3', '/h4', '/h5', '/h6', 'Ничего']
                         info += 'Бот распосзнает несколько типов команд. Чтобы получить информацию по формату ввода этих команд - введите:\n'
-                        if (arr.includes('admin', 0)) {
+                        if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
                             btns_list.unshift('/h0')
                             info += '1) Команды добавления ролей - "/h0"\n'
                         }
@@ -313,6 +323,8 @@ class MyBot extends ActivityHandler {
                             info = messgs.h5
                         else if (key == 'h6')
                             info = messgs.h6
+                        else
+                            info= 'Команда не распознана. Попробуйте /help'
 
                         if (info != '')
                             await context.sendActivity(info);
@@ -330,20 +342,34 @@ class MyBot extends ActivityHandler {
                 /* #endregion */
                 /* #region  Организация совещаний и обновление имени пользователя*/
                 else if (words[0].search(reg10) != -1) {    //запомни тему для совещаний / запомни меня как <name>
+                    let user = new User();
                     let answ = ''
                     if (words[1].search('меня') != -1) {
                         let i = 1
-                        while (i < words.length - 1 && words[i] != 'как')    //скипаю до как и чтобы после как еще 1 слово могло поместиться
-                            i++
-                        if (i < words.length - 1)
-                            i++
-                        let nickname = words.slice(i).join(' ').trim()
-                        //
-                        console.log(nickname)
-                        let user = new User();
-                        answ = await user.userAdd(context.activity.from, md, 'users', nickname);
-                    } else {
+                        if(words.join(' ').search('как')!=-1){  //Если пользователь сам выбирает имя себе
+                            console.log(words)
+                            while (i < words.length - 1 && words[i] != 'как')    //скипаю до как и чтобы после как еще 1 слово могло поместиться
+                                i++
+                            if (i < words.length - 1){
+                                i++
+                                //
+                                let nickname = words.slice(i).join(' ').trim()
+                                //
+                                console.log(nickname)
+                                
+                                answ = await user.userAdd(context.activity.from, md, 'users', nickname);
+                            }
+                            else{
+                                answ='Вы не указали регистрируемое имя!'
+                            }   
+                        }else{  //Если просто зарегистрируй как в ms teams записан пользователь
+                            answ = await user.userAdd(context.activity.from, md, 'users');
+                        }                        
+                        
+                    } else if(words[1].search(/тем/)!=-1){
                         answ = await meetup.add_theme(md, words, context.activity.localTimestamp)
+                    }else{
+                        answ='Команда не была распознана. Попробуйте /help'
                     }
                     await context.sendActivity(answ)
                 } else if (words[0].search(reg11) != -1) {
@@ -381,23 +407,32 @@ class MyBot extends ActivityHandler {
                 /* #endregion */
                 else if (words[0].search('ничего') != -1) { } //Просто типа скипа
                 /* #region  Добавление роли */
-                else {  //Тут я решил почему то добавление роли как ендкейс сделать :/  типа "выдай роль такая-то тому-то" именно в таком порядке роль - название - пользователь
+                else if(words[0].search(/дай/) !=-1){  //Тут я решил почему то добавление роли как ендкейс сделать :/  типа "выдай роль такая-то тому-то" именно в таком порядке роль - название - пользователь
                     //Сделать удаление и просмотр ролей
                     //!!!!!!!!!!!!!!
-                    console.log('Проверка на ключевое слово "роль"')
-                    let ind = 0;
-                    while (words[ind] != 'роль' && ind != words.length)//Останавливается на роли
-                        ind++;
-                    if (ind != words.length) {
-                        let role = new Role();
-                        //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
-                        var check = role.addRole(words, ind, md, 'roles');
-                        if (check)
-                            await context.sendActivity('Роли были добавлены');
+                    let arr = await role.getRole(context.activity.from.name.toLocaleLowerCase(), md, 'roles');
+                    if(arr.includes('admin',0) || context.activity.from.name=='Егор Меретин'){
+                        console.log('Проверка на ключевое слово "роль"')
+                        let ind = 0;
+                        while (words[ind] != 'роль' && ind != words.length)//Останавливается на роли
+                            ind++;
+                        if (ind != words.length) {
+                            //container  = await client.database(process.env.DATABASE).containers.createIfNotExists({ id: 'roles' });
+                            var answer = await role.addRole(words, ind, md);
+                            await context.sendActivity(answer);
+                        }                           
+                    }else{
+                        await context.sendActivity('Только офисменеджер и администратор может выдавать роли')
                     }
-                    else
-                        await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n\n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');
                 }
+                //Забери роль role у user1,user2
+                else if(words[0].search(reg17)!=-1){
+
+                }
+                else{
+                    await context.sendActivity('Чтобы получить информацию о существующих командах - отправьте /help. \n\n Чтобы оставить сообщение о баге или некорректной работе команды - отправьте /bug <Описание проблемы>');
+                }
+
                 /* #endregion */
             }
             catch (err) {

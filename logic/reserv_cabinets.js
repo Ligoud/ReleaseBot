@@ -98,7 +98,7 @@ class cabs
             resInfo:''
         };
         if(list.length==0){        
-            resObj.resInfo= 'На '+query['date.day']+'.'+query['date.month']+'.'+query['date.year']+' нет забронированных кабинетов'
+            resObj.resInfo= 'На '+this.parser.correctDigit(query['date.day'])+'.'+this.parser.correctDigit(query['date.month'])+'.'+query['date.year']+' нет забронированных кабинетов'
         }
         else{
             //console.log('Длина :',list.length);

@@ -1,7 +1,12 @@
-function afk_logic(context,words) //Обработка 
+async function afk_logic(context,words,md) //Обработка 
 {
     //await context.sendActivity('Выполняется логика афк');
     var _name=context.activity.from.name.toLocaleLowerCase(), _id=context.activity.from.id //Имя пользователя и его id (предполагаю это будет статичная информация в ms teams)
+    //
+    let regName=await md.read('users',{userId:_id})
+    if(regName.length>0){   //имя существует
+        _name=regName[0].userName
+    }
     let localTimeStamp=context.activity.localTimestamp
     let hrs=localTimeStamp.getHours(), mins=localTimeStamp.getMinutes();
     //тут контейнер стоял     
@@ -29,6 +34,8 @@ function afk_logic(context,words) //Обработка
         else
             return false;
     }    
+    //
+    //
     const {TimeParser}=require('./timeParser');
     let parser=new TimeParser()
     var unt=2,val=2;    //Индекс единицы измерения и значения времени                
@@ -55,6 +62,7 @@ function afk_logic(context,words) //Обработка
     else
         ok=false;
     if(!ok){ //Указывается причина значит
+        words=words.join(' ').replace('.','. ').split(' ')
         var i=1;
         var rsn=words[0]+' ';//Причина
         while(i!=words.length && words[i]!='вернусь' && words[i]!='буду')   //Причина ухода
@@ -98,13 +106,17 @@ function afk_logic(context,words) //Обработка
         }
         else{
             console.log("не указал время возвращения")
+            
         }
         
     }
     console.log('writing in database')
+    if(Number.isNaN(afk.returns.value))
+        afk.returns.value=1
     //console.log(afk);
     return afk;
 }
+//Формирование информации об АФКашере
 function form_afk_info(obj)
 {                        
     let result=''
@@ -135,7 +147,7 @@ function form_afk_info(obj)
                                                     
     return result;
 }  
-function who_afk(words)
+function who_afk(words) //где имяпользователя
 {
     let username=''
                   
@@ -144,9 +156,10 @@ function who_afk(words)
         let myname='';
         while(myname[myname.length-1]!='?' && words[id]!='?' && id!=words.length) //Либо до конца либо до знака вопроса
         {
-            myname=myname+words[id];
+            myname=myname+words[id]+' ';
             id++;
-        }
+        }    
+        myname=myname.trim();
         if(myname[myname.length-1]=='?')
             myname=myname.slice(0,-1); //Последний символ обрубаю
         return myname;
@@ -155,21 +168,24 @@ function who_afk(words)
         username=get_name(1)                    
     else //Если был задан вопрос куда ушел или когда вернется и тп (из двух слов состоящий)                    
         username=get_name(2)   
-        //cosmosquery
-    /*const query={
-        query:"SELECT * FROM c WHERE c.person.name = @username",
-        parameters: [
-            {
-                name: "@username",
-                value: username
-            }
-        ]
-    }*/
+
     const query={
         'person.name': username                    
     }
+    console.log(username+' kkkkk')
     return query;
+}
+async function get_list_of_users(md){
+    let list=await md.read('users',{})
+    const endd='\n\n'
+    let res='Список зарегистрированных имен:'+endd
+    list.forEach(el=>{        
+        res+='Имя в чат-боте: '+el.userName+'. '
+        res+='Имя аккаунта Teams: '+el.msName+endd         
+    })
+    return res
 }
 module.exports.afk_logic=afk_logic;
 module.exports.who_afk=who_afk;
 module.exports.form_afk_info=form_afk_info;
+module.exports.get_list_of_users=get_list_of_users
