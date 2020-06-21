@@ -310,8 +310,11 @@ class MyBot extends ActivityHandler {
                         await md.add('review', itm);
                         await context.sendActivity('Информаия о неисправности отправлена разработчику')
                     }else if(key == 'adm'){
-                        if(words[1].search('upd')!=-1){
-                            inject.installAppFromGitHub()
+                        let arr = await role.getRole(context.activity.from.id, md);
+                        if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
+                            if(words[1].search('upd')){
+                                inject.installAppFromGitHub()
+                            }
                         }
                     }
                     else {
