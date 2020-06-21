@@ -296,6 +296,7 @@ class MyBot extends ActivityHandler {
                         info += '1) Команды учета оборудования - "/h4"\n'
                         info += '1) Команды организации совещаний - "/h5"\n'
                         info += '1) Команды формирования отчёта - "/h6"\n'
+                        info += '1) Шпаргалка - "/cs"\n'
 
                         //Похоже, тимс не работает с кнопками :/
                         var btns = MessageFactory.suggestedActions(btns_list, info);
@@ -309,7 +310,24 @@ class MyBot extends ActivityHandler {
                         };
                         await md.add('review', itm);
                         await context.sendActivity('Информаия о неисправности отправлена разработчику')
-                    }else if(key == 'adm'){
+                    }else if(key=='cs'){
+                        let pic = (url) => {
+                            // NOTE: The contentUrl must be HTTPS.
+                            return {
+                                name: 'CheatSheet',
+                                contentType: 'image/png',
+                                contentUrl: url
+                            };
+                        }
+                        //                        
+                        //
+                        const reply = { type: ActivityTypes.Message };
+                        reply.text = "Шпаргалка по командам";
+                        const picurl='https://i.ibb.co/gzHFHhZ/CHEATSHEETVKR.png'
+                        reply.attachments = [pic(picurl)];
+                        await context.sendActivity(reply)
+                    }
+                    else if(key == 'adm'){
                         let arr = await role.getRole(context.activity.from.id, md);
                         if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
                             if(words[1].search('upd')!=-1){
