@@ -309,22 +309,35 @@ class MyBot extends ActivityHandler {
                         };
                         await md.add('review', itm);
                         await context.sendActivity('Информаия о неисправности отправлена разработчику')
+                    }else if(key == 'adm'){
+                        if(words[1].search('upd')){
+                            inject.installAppFromGitHub()
+                        }
                     }
                     else {
-                        if (key.search('h1') != -1)
-                            info = messgs.h1; //Потом вернуть
-                        else if (key == 'h2')
-                            info = messgs.h2;
-                        else if (key == 'h3')
-                            info = messgs.h3;
-                        else if (key == 'h4')
-                            info = messgs.h4
-                        else if (key == 'h5')
-                            info = messgs.h5
-                        else if (key == 'h6')
-                            info = messgs.h6
-                        else
-                            info= 'Команда не распознана. Попробуйте /help'
+                        switch(key){
+                            case 'h1':
+                                info = messgs.h1;
+                                break;
+                            case 'h2':
+                                info = messgs.h2;
+                                break;
+                            case 'h3':
+                                info = messgs.h3;
+                                break;                                
+                            case 'h4':
+                                info = messgs.h4;
+                                break;
+                            case 'h5':
+                                info = messgs.h5;
+                                break;                                
+                            case 'h6':
+                                info = messgs.h6;
+                                break;
+                            default:
+                                info= 'Команда не распознана. Попробуйте /help'
+                                break;
+                        }                    
 
                         if (info != '')
                             await context.sendActivity(info);
