@@ -323,7 +323,7 @@ class MyBot extends ActivityHandler {
                         //
                         const reply = { type: ActivityTypes.Message };
                         reply.text = "Шпаргалка по командам";
-                        const picurl='https://i.ibb.co/gzHFHhZ/CHEATSHEETVKR.png'
+                        const picurl='https://i.ibb.co/92d7CDB/vkr-v2-0.png'
                         reply.attachments = [pic(picurl)];
                         await context.sendActivity(reply)
                     }
