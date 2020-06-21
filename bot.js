@@ -310,7 +310,7 @@ class MyBot extends ActivityHandler {
                         await md.add('review', itm);
                         await context.sendActivity('Информаия о неисправности отправлена разработчику')
                     }else if(key == 'adm'){
-                        if(words[1].search('upd')){
+                        if(words[1].search('upd')!=-1){
                             inject.installAppFromGitHub()
                         }
                     }
