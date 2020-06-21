@@ -315,6 +315,8 @@ class MyBot extends ActivityHandler {
                             if(words[1].search('upd')){
                                 inject.installAppFromGitHub()
                             }
+                        }else{
+                            await context.sendActivity('Вы должны быть разработчиком или администратором, чтобы выполнять такие команды.')
                         }
                     }
                     else {
