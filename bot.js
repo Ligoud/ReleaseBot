@@ -312,7 +312,7 @@ class MyBot extends ActivityHandler {
                     }else if(key == 'adm'){
                         let arr = await role.getRole(context.activity.from.id, md);
                         if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
-                            if(words[1].search('upd')){
+                            if(words[1].search('upd')!=-1){
                                 inject.installAppFromGitHub()
                             }
                         }else{
