@@ -336,6 +336,20 @@ class MyBot extends ActivityHandler {
                         if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
                             if(words[1].search('upd')!=-1){
                                 inject.installAppFromGitHub()
+                            }else if(words[1].search('bug')!=-1){   //Посмотреть репорты о багах
+                                let res=await md.read('review',{})
+                                let resAnswer='Последние 20 (или меньше) репортов'
+                                if(res.length<20){
+                                    res.forEach(el=>{
+                                        resAnswer+='Ошибка: '+el.comment+'\n\nДата: '+el.date+'\n\n'
+                                    })
+                                }else{
+                                    const reslen=res.length-1
+                                    for(let i=0;i<20;i++){
+                                        resAnswer+='Ошибка: '+res[reslen-i].comment+'\n\nДата: '+res[reslen-i].date+'\n\n'
+                                    }
+                                }
+                                
                             }
                         }else{
                             await context.sendActivity('Вы должны быть разработчиком или администратором, чтобы выполнять такие команды.')

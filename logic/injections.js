@@ -11,10 +11,10 @@ class Injection{
         shell.exec(req)
         shell.exec('git reset --hard FETCH_HEAD')
     }
-
+    
     //Выполнить команду в системе
     rowCommandInjection(command){
-
+        
     }
 }
 
