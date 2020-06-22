@@ -339,7 +339,7 @@ class MyBot extends ActivityHandler {
                             }else if(words[1].search('bug')!=-1){   //Посмотреть репорты о багах
                                 let res=await md.read('review',{})
                                 let resAnswer='Последние 20 (или меньше) репортов'
-                                if(res.length<20){
+                                if(res.length<20 && res.length>0){
                                     res.forEach(el=>{
                                         resAnswer+='Ошибка: '+el.comment+'\n\nДата: '+el.date+'\n\n'
                                     })
