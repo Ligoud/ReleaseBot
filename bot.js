@@ -48,7 +48,8 @@ class MyBot extends ActivityHandler {
             var text = context.activity.text.toLocaleLowerCase();
             var words = text.split(' ');
             /* #region  Проверка на опечатки */
-                let Morph = require('az').Morph
+            //Плохая идея, оказалось. Слова меняет из-за того, что знаки препиания вплотную стоят
+                /*let Morph = require('az').Morph
                 let prom = new Promise((resolve, reject) => {
                     Morph.init(() => {
                         console.log('DAWG loaded in msg receive')
@@ -56,11 +57,12 @@ class MyBot extends ActivityHandler {
                     })
                 })
                 await prom                
-                words.forEach((el,ind,arr)=>{                    
+                words.forEach((el,ind,arr)=>{                  
                     let parse=Morph(el,{typos:'auto',stutter:5})
+                    arr[ind].replace()
                     if(parse.length>0)  //Если распознаваемое слово. П.С. слово мем - не распознаваемое xD                        
                         arr[ind]=Morph(el,{typos:'auto',stutter:5})[0].word                        
-                })
+                })*/
             /* #endregion */
 
             //await context.sendActivity(`Вы сказали '${ text }'`);
@@ -235,7 +237,9 @@ class MyBot extends ActivityHandler {
                 else if (words[0].search(reg14) != -1) {
                     let cnsmbls = new Consumables();
                     let localReg = /товар|расходник/
-                    if (words[1].search(localReg) != -1 || words[1].search('купит') != -1) {  //Если в этой ветке еще чота будет - добавить проверку на ключевое слово 'купить'
+                    console.log(words[1]+' '+words[1].search(/купит/) )
+                    if (words[1].search(localReg) != -1 || words[1].search(/купит/) != -1) {  //Если в этой ветке еще чота будет - добавить проверку на ключевое слово 'купить'
+                        console.log('im in it')
                         let answ = await cnsmbls.getBasketList('basket_to_buy', md)
                         await context.sendActivity(answ)
                     }
