@@ -343,13 +343,15 @@ class MyBot extends ActivityHandler {
                                     res.forEach(el=>{
                                         resAnswer+='Ошибка: '+el.comment+'\n\nДата: '+el.date+'\n\n'
                                     })
-                                }else{
+                                }else if(res.length>0){
                                     const reslen=res.length-1
                                     for(let i=0;i<20;i++){
                                         resAnswer+='Ошибка: '+res[reslen-i].comment+'\n\nДата: '+res[reslen-i].date+'\n\n'
                                     }
+                                }else{
+                                    resAnswer='Отчётов об ошибках нет :)'
                                 }
-                                
+                                await context.sendActivity(resAnswer)
                             }
                         }else{
                             await context.sendActivity('Вы должны быть разработчиком или администратором, чтобы выполнять такие команды.')
