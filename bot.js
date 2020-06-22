@@ -429,11 +429,16 @@ class MyBot extends ActivityHandler {
                     }
                     await context.sendActivity(answ)
                 } else if (words[0].search(reg11) != -1) {
-                    if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
-                        let answ = await meetup.set_main_theme(md, words, context.activity.localTimestamp)
-                        await context.sendActivity(answ)
-                    } else if (words[1].search(/врем/) != -1) {   //Установи время проведения совещания
+                    let arr = await role.getRole(context.activity.from.id, md);
+                    if (arr.includes('admin', 0) ||context.activity.from.name=='Егор Меретин') {
+                        if (words[1].search(/основн/) != -1) {  //Установи основную тему для совещаний
+                            let answ = await meetup.set_main_theme(md, words, context.activity.localTimestamp)
+                            await context.sendActivity(answ)
+                        } else if (words[1].search(/врем/) != -1) {   //Установи время проведения совещания
 
+                        }
+                    }else{
+                        await context.sendActivity('Только офисменеджер и администратор может управлять организацией совещания')
                     }
                 }
                 /* #endregion */

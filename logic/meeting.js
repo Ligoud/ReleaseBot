@@ -30,8 +30,8 @@ class Meeting{
             let i=1
             i=this.skip_till_theme(words,i)
             let newarr=words.slice(i)  //если нет для совещания, то будет 2
-            if(newarr.includes('на')){
-                let theme_date=newarr.join(' ').split('на')
+            if(newarr.includes('date')){
+                let theme_date=newarr.join(' ').split('date')
                 theme=theme_date[0].trim()
                 date=this.parser.parseCustomDate(theme_date[1],1)                
             }else{
