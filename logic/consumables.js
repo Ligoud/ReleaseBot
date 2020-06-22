@@ -225,6 +225,7 @@ class Consumables {
         const res = this.get_sets(words, ind);
         count = res.count;
         cons = res.cons;
+        //console.log(count)
         let returnAnswer = 'Записи обновлены.'
         //
         //console.log(optional_container)
@@ -245,13 +246,14 @@ class Consumables {
                         await delteFromBasketInCaseWeNeedIt(cObj.consum_name,cObj.count)
                     } else if (action == 'remove') {
                         if (cons.length == 1)
-                            returnAnswer = 'О расходнике "' + cons[i] + '" не было найдено записей.'
+                            returnAnswer = '\n\nО расходнике "' + cons[i] + '" не было найдено записей.'
                         else
-                            returnAnswer += '\nО расходнике "' + cons[i] + '" не было найдено записей.\n'
+                            returnAnswer += '\n\nО расходнике "' + cons[i] + '" не было найдено записей.\n\n'
                         cObj.consum_name = cons[i]
                         cObj.count = 0
                         
                         await md.add(cName, cObj)
+                        await this.change_busket('add', md, optional_container, cObj.consum_name, 0)
                     }
                 } else {    //Если записи уже есть
                     let result = await md.read(cName, { _id: res[0]._id })
