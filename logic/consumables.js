@@ -263,15 +263,16 @@ class Consumables {
                         await delteFromBasketInCaseWeNeedIt(maBody.consum_name,count[i])
                     }
                     else if (action == 'remove') {
-                        if (maBody.count == 0)
+                        /*if (maBody.count == 0)
                             returnAnswer += '\nСудя по всему расходника "' + maBody.consum_name + '" нет в наличии либо не обновлены данные о нем\n'
-                        else {
+                        else {*/
                             maBody.count -= count[i]
                             if (maBody.count <= 0) {
+                                maBody.count=0
                                 returnAnswer += '\nРасходник "' + maBody.consum_name + '" был добавлен в список товаров к покупке (закончились на складе)'
                                 await this.change_busket('add', md, optional_container, maBody.consum_name, 0)
                             }
-                        }
+                        //}
                     }
                     //console.log('THERE IS A HUGE PROBLEm')
                     await md.replace(cName, { _id: res[0]._id }, maBody);
