@@ -206,16 +206,24 @@ class cabs
                     hrs:localDate.getHours(),
                     mins:localDate.getMinutes()
                 }
+                let curdate=new Date()
+                let nextDay=false   //Проверяем, указан ли день в будущем. true - да. false - на текущую дату
+                console.log(curdate)
+                console.log(new Date(res.date.year,res.date.month,res.date.day))
+                if(res.date.day!==undefined){
+                    nextDay=(curdate < new Date(res.date.year,res.date.month,res.date.day))
+                }
+                console.log(nextDay)
                 let preDeclineMsg='Бронировать кабинет можно только на текущий день (время начала должно быть меньше времени окончания брони)'
-                if(res.time.begins.hours<0 || res.time.begins.hours>23 || res.time.ends.hours<0 || res.time.ends.hours>23)
+                if((res.time.begins.hours<0 || res.time.begins.hours>23 || res.time.ends.hours<0 || res.time.ends.hours>23) && !nextDay)
                     return 'Количество часов должно быть в промежутке от 0 до 23'
-                else if(res.time.begins.minutes<0 || res.time.begins.minutes>59 || res.time.ends.minutes<0 || res.time.ends.minutes>59)
+                else if((res.time.begins.minutes<0 || res.time.begins.minutes>59 || res.time.ends.minutes<0 || res.time.ends.minutes>59) && !nextDay)
                     return 'Количество минут должно быть в промежутке от 0 до 59'
-                else if(res.time.begins.hours>res.time.ends.hours)
+                else if((res.time.begins.hours>res.time.ends.hours) && !nextDay)
                     return preDeclineMsg
-                else if(res.time.begins.hours==res.time.ends.hours && res.time.begins.minutes>=res.time.ends.minutes)
+                else if((res.time.begins.hours==res.time.ends.hours && res.time.begins.minutes>=res.time.ends.minutes) && !nextDay)
                     return preDeclineMsg
-                else if(res.time.begins.hours<msgTime.hrs || (res.time.begins.hours==msgTime.hrs && res.time.begins.minutes<msgTime.mins))
+                else if((res.time.begins.hours<msgTime.hrs || (res.time.begins.hours==msgTime.hrs && res.time.begins.minutes<msgTime.mins)) && !nextDay)
                     return 'Задним числом бронировать нельзя'
                 //
                 //Проверка на то, занято ли время брони или нет
