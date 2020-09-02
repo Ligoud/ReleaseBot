@@ -1,0 +1,27 @@
+version: "3"
+services:
+    mongo:
+        image: mongo:latest
+        networks:
+            - mynet
+        ports: 
+            - "27017:27017"
+    server:
+        build: ./server/  
+        networks:
+            - mynet        
+        ports:
+            - "80:80"    
+            - "443:443"
+        environment:
+            - MONGO_URL=mongodb://mongo:27017/            
+        depends_on:
+            - "mongo"
+        tty: true
+networks:
+  mynet:
+  
+  
+  
+  
+  
